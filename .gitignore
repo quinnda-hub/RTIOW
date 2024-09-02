@@ -5,3 +5,4 @@ move.sh
 RTIOW.eventlog 
 RTIOW.prof 
 RTIOW
+.gitignore
