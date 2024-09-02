@@ -25,6 +25,9 @@ import           Vec3          (Vec3 (..), lengthSquared, magnitude, negateV,
 sampleFraction :: RandomGen g  => g -> (R, g)
 sampleFraction = randomR (0, 1)
 
+sampleFractionInRange :: RandomGen g => g -> R -> R -> (R, g)
+sampleFractionInRange gen a b = randomR (min a b, max a b) gen 
+
 {-# INLINE sampleSquare #-}
 sampleSquare :: RandomGen g => g -> ((R, R), g)
 sampleSquare gen =

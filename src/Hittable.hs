@@ -67,22 +67,22 @@ data Material where
     Dialectric :: R -> Material
 
 instance Scatterable Material where
-    scatter (Lambertian albedo) _ (Hit p normal _ _ _) g =
+    scatter (Lambertian albedo) (Ray _ _ time) (Hit p normal _ _ _) g =
         let (sampled, g') = randomUnitVector g
             direction     = sampled ^+^ normal
             direction'    = if nearZero direction then normal else direction
-            scattered     = Ray p direction' 0
+            scattered     = Ray p direction' time
         in (Just (scattered, albedo), g')
 
-    scatter (Metal albedo fuzz) (Ray _ direction _) (Hit p normal _ _ _) g =
+    scatter (Metal albedo fuzz) (Ray _ direction time) (Hit p normal _ _ _) g =
         let (sampled, g')   = randomInUnitSphere g
             reflected       = reflect (normalize direction) normal
-            scattered       = Ray p (reflected ^+^ sampled ^* min fuzz 1.0) 0
+            scattered       = Ray p (reflected ^+^ sampled ^* min fuzz 1.0) time
         in if normal <.> reflected > 0
             then (Just (scattered, albedo), g')
             else (Nothing, g')
 
-    scatter (Dialectric refIdx) (Ray _ direction _) h g =
+    scatter (Dialectric refIdx) (Ray _ direction time) h g =
         let attenuation   = Vec3 1 1 1
             cosTheta      = min (hitNormal h <.> negateV (normalize direction)) 1.0
             sinTheta      = sqrt (1.0 - cosTheta * cosTheta)
@@ -92,7 +92,7 @@ instance Scatterable Material where
             direction'    = if ratio * sinTheta > 1 || refProb > sampled
                             then reflect (normalize direction) (hitNormal h)
                             else refract (normalize direction) (hitNormal h) ratio
-            scattered     = Ray (hitPoint h) direction' 0
+            scattered     = Ray (hitPoint h) direction' time
         in (Just (scattered, attenuation), g')
 
 schlick :: R -> R -> R

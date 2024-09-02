@@ -19,7 +19,7 @@ module Camera where
 import           Hittable      (Hit (..), Scatterable (scatter), hitList)
 import           Interval      (Interval (..), interval)
 import           Math          (R, degrees2Radians, infinity)
-import           Random        (randomInUnitDisk)
+import           Random        (randomInUnitDisk, sampleFraction)
 import           Ray           (Ray (..))
 import           System.Random (RandomGen)
 import           Vec3          (RGB, Vec3 (..), negateV, normalize, zeroV, (*^),
@@ -95,8 +95,11 @@ getRay camera baseU baseV gen =
                 ^-^ camOrigin camera
                 ^-^ offset
 
+    -- Generate a random ray time. 
+    time = fst $ sampleFraction g' 
+
     -- Create the ray
-    ray = Ray orig direction 0
+    ray = Ray orig direction time
 
 rayColour :: RandomGen g
           => g
