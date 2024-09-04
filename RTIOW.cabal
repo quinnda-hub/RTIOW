@@ -66,6 +66,7 @@ library
                       Math,
                       Random,
                       Ray,
+                      Scenes,
                       Sphere,
                       Vec3,
                       Utils
