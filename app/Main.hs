@@ -3,7 +3,7 @@ module Main where
 import           Camera (Camera (..), createCamera)
 import           Image  (writeImage)
 import           Math   (R)
-import           Scenes (staticBalls, bouncingBalls)
+import           Scenes (bouncingBalls)
 import           Vec3   (Vec3 (..))
 
 aspectRatio :: R
