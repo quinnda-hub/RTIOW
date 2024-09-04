@@ -54,3 +54,9 @@ clamp (Interval a b) x
     | x > b     = b
     | otherwise = x
 clamp Empty x = x
+
+expand :: Interval -> R -> Interval 
+expand (Interval a b) x = 
+    let padding = x / 2 
+    in Interval (a-padding) (b+padding)
+expand Empty _ = Empty
