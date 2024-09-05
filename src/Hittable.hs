@@ -1,4 +1,5 @@
-{-# LANGUAGE GADTs #-}
+{-# LANGUAGE GADTs              #-}
+{-# LANGUAGE ImpredicativeTypes #-}
 
 {- |
 Module      :  Hittable
@@ -18,7 +19,7 @@ objects and implements the Schlick approximation for reflectivity.
 
 module Hittable where
 
-import           AABB                (AABB (AABBEmpty), enclosingAABB)
+import           AABB                (AABB (AABBEmpty))
 import           Control.Applicative ((<|>))
 import           Data.List           (foldl')
 import           Interval            (Interval (..), interval)
@@ -45,15 +46,17 @@ class Hittable a where
         -> Maybe Hit
     boundingBox :: a -> AABB
 
-data World = World { getHittables :: [Object]
+data World = World { getHittables :: [SomeHittable]
                    , getWorldBox  :: AABB
                    }
 
-type Object = Ray -> Interval -> Maybe Hit
+data SomeHittable where
+    SomeHittable :: Hittable a => a -> SomeHittable
 
 emptyWorld :: World
 emptyWorld = World { getHittables = [], getWorldBox = AABBEmpty}
 
+{-
 addObject :: Hittable a =>
              World
           -> a
@@ -62,20 +65,22 @@ addObject (World objs box) newObj =
     let newbox = enclosingAABB box (boundingBox newObj)
     in World {getHittables = objs ++ [hit newObj], getWorldBox = newbox}
 
+
 hitWorld :: World -> Ray -> Interval -> Maybe Hit
 hitWorld (World objs _) = hitList objs
+-}
 
 {-# INLINE hitList #-}
 hitList :: Foldable t =>
-           t (Ray -> Interval -> Maybe Hit) -- List of functions representing hittable objects.
+           t SomeHittable -- List of functions representing hittable objects.
         -> Ray
         -> Interval
         -> Maybe Hit
 hitList hittables ray tRange =
-    let checkHit :: Maybe Hit -> (Ray -> Interval -> Maybe Hit) -> Maybe Hit
-        checkHit closestHit hittable =
+    let checkHit :: Maybe Hit -> SomeHittable -> Maybe Hit
+        checkHit closestHit (SomeHittable hittable) =
             let closestSoFar = maybe (iMax tRange) hitT closestHit
-            in hittable ray (interval (iMin tRange) closestSoFar) <|> closestHit
+            in hit hittable ray (interval (iMin tRange) closestSoFar) <|> closestHit
     in foldl' checkHit Nothing hittables
 
 class Scatterable a where

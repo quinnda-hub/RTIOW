@@ -22,7 +22,7 @@ import           Ray      (Ray (..))
 import           Vec3     (Vec3 (..), zeroV)
 import Math (R)
 
-data AABB = AABB { xInterval, yInterval, zInterval :: Interval}
+data AABB = AABB { xInterval, yInterval, zInterval :: !Interval}
                  | AABBEmpty
                  deriving (Show, Eq)
 
@@ -71,6 +71,6 @@ longestAxis (AABB x y z) =
       ySize = iMax y - iMin y 
       zSize = iMax z - iMin z 
   in if xSize > ySize 
-    then if zSize > zSize then xComp else zComp
+    then if xSize > zSize then xComp else zComp
     else if ySize > zSize then yComp else zComp
 longestAxis AABBEmpty = xComp -- Just use the x axis as a default for an empty AABB.

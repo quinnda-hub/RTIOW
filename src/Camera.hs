@@ -1,29 +1,30 @@
-{- | 
+{- |
 Module      :  Camera
 Copyright   :  (c) Quinn Anhorn. 2024
 License     :  BSD3 (see LICENSE)
 Maintainer  :  qda869@usask.ca
 Stability   :  experimental
 
-This module defines the `Camera` data type and associated functions for 
-creating a camera in a ray tracing context. The `Camera` module allows 
-for the generation of rays based on a camera's position, orientation, 
-and lens characteristics, providing the necessary tools to render a 
-scene. Functions like `createCamera` and `getRay` are provided to set 
-up and use the camera, and `rayColour` is used to compute the color of 
+This module defines the `Camera` data type and associated functions for
+creating a camera in a ray tracing context. The `Camera` module allows
+for the generation of rays based on a camera's position, orientation,
+and lens characteristics, providing the necessary tools to render a
+scene. Functions like `createCamera` and `getRay` are provided to set
+up and use the camera, and `rayColour` is used to compute the color of
 rays as they interact with objects in the scene.
 -}
 
 module Camera where
 
-import           Hittable      (Hit (..), Scatterable (scatter), hitList)
-import           Interval      (Interval (..), interval)
+import           Hittable      (Hit (..), Scatterable (scatter), Hittable (..))
+import           Interval      (interval)
 import           Math          (R, degrees2Radians, infinity)
 import           Random        (randomInUnitDisk, sampleFraction)
 import           Ray           (Ray (..))
 import           System.Random (RandomGen)
 import           Vec3          (RGB, Vec3 (..), negateV, normalize, zeroV, (*^),
                                 (><), (^*), (^*^), (^+^), (^-^))
+import BVH (BVHNode)
 
 data Camera = Camera { camLowerLeftCorner :: Vec3
                      , camHorizontal      :: Vec3
@@ -95,8 +96,8 @@ getRay camera baseU baseV gen =
                 ^-^ camOrigin camera
                 ^-^ offset
 
-    -- Generate a random ray time. 
-    time = fst $ sampleFraction g' 
+    -- Generate a random ray time.
+    time = fst $ sampleFraction g'
 
     -- Create the ray
     ray = Ray orig direction time
@@ -104,16 +105,16 @@ getRay camera baseU baseV gen =
 rayColour :: RandomGen g
           => g
           -> Int -- Max recursion depth.
-          -> [Ray -> Interval -> Maybe Hit]
+          -> BVHNode
           -> Ray
           -> RGB
 rayColour _ 0 _ _ = zeroV
-rayColour g d w r =
-    case hitList w r (interval 0.001 infinity) of
+rayColour g d bvh r =
+    case hit bvh r (interval 0.001 infinity) of
         Just hitRecord@(Hit _ _ _ _ m) ->
             case scatter m r hitRecord g of
                 (Just (scatteredRay, attenuation), g') ->
-                    attenuation ^*^ rayColour g' (d-1) w scatteredRay
+                    attenuation ^*^ rayColour g' (d-1) bvh scatteredRay
                 (Nothing, _) ->
                     zeroV
         Nothing ->
