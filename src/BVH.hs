@@ -26,14 +26,17 @@ buildBVH objects =
 instance Hittable BVHNode where 
     hit (BVHLeaf (SomeHittable obj) bbox) ray tRange 
         | hitAABB bbox ray tRange = hit obj ray tRange 
-        | otherwise               = Nothing
+        | otherwise               = Nothing 
     hit (BVHBranch left right bbox) ray tRange 
-        | not (hitAABB bbox ray tRange) = Nothing
+        | not (hitAABB bbox ray tRange) = Nothing 
         | otherwise = 
-            let leftHit  = hit left ray tRange 
-                newTMax  = maybe (iMax tRange) hitT leftHit 
-                rightHit = hit right ray (interval (iMin tRange) newTMax) 
-            in rightHit <|> leftHit  
+            case hit left ray tRange of 
+                Just leftHit -> 
+                    let newTMax  = hitT leftHit 
+                        rightHit = hit right ray (interval (iMin tRange) newTMax) 
+                    in rightHit <|> Just leftHit
+                Nothing -> 
+                    hit right ray tRange 
 
     boundingBox (BVHLeaf _ bbox)     = bbox 
     boundingBox (BVHBranch _ _ bbox) = bbox 

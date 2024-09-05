@@ -19,18 +19,15 @@ objects and implements the Schlick approximation for reflectivity.
 
 module Hittable where
 
-import           AABB                (AABB (AABBEmpty))
-import           Control.Applicative ((<|>))
-import           Data.List           (foldl')
-import           Interval            (Interval (..), interval)
-import           Math                (R)
-import           Random              (randomInUnitSphere, randomUnitVector,
-                                      sampleFraction)
-import           Ray                 (Ray (..))
-import           System.Random       (RandomGen)
-import           Vec3                (RGB, Vec3 (..), nearZero, negateV,
-                                      normalize, reflect, refract, (<.>), (^*),
-                                      (^+^))
+import           AABB          (AABB)
+import           Interval      (Interval (..))
+import           Math          (R)
+import           Random        (randomInUnitSphere, randomUnitVector,
+                                sampleFraction)
+import           Ray           (Ray (..))
+import           System.Random (RandomGen)
+import           Vec3          (RGB, Vec3 (..), nearZero, negateV, normalize,
+                                reflect, refract, (<.>), (^*), (^+^))
 
 data Hit = Hit { hitPoint     :: !Vec3     -- The point of intersection.
                , hitNormal    :: !Vec3     -- The normal at the intersection.
@@ -52,36 +49,6 @@ data World = World { getHittables :: [SomeHittable]
 
 data SomeHittable where
     SomeHittable :: Hittable a => a -> SomeHittable
-
-emptyWorld :: World
-emptyWorld = World { getHittables = [], getWorldBox = AABBEmpty}
-
-{-
-addObject :: Hittable a =>
-             World
-          -> a
-          -> World
-addObject (World objs box) newObj =
-    let newbox = enclosingAABB box (boundingBox newObj)
-    in World {getHittables = objs ++ [hit newObj], getWorldBox = newbox}
-
-
-hitWorld :: World -> Ray -> Interval -> Maybe Hit
-hitWorld (World objs _) = hitList objs
--}
-
-{-# INLINE hitList #-}
-hitList :: Foldable t =>
-           t SomeHittable -- List of functions representing hittable objects.
-        -> Ray
-        -> Interval
-        -> Maybe Hit
-hitList hittables ray tRange =
-    let checkHit :: Maybe Hit -> SomeHittable -> Maybe Hit
-        checkHit closestHit (SomeHittable hittable) =
-            let closestSoFar = maybe (iMax tRange) hitT closestHit
-            in hit hittable ray (interval (iMin tRange) closestSoFar) <|> closestHit
-    in foldl' checkHit Nothing hittables
 
 class Scatterable a where
     scatter :: RandomGen g => a -> Ray -> Hit -> g -> (Maybe (Ray, RGB), g)
