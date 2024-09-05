@@ -60,3 +60,10 @@ expand (Interval a b) x =
     let padding = x / 2 
     in Interval (a-padding) (b+padding)
 expand Empty _ = Empty
+
+-- Constructs an interval given two existing Intervals.
+enclosingInterval :: Interval -> Interval -> Interval 
+enclosingInterval (Interval amin amax) (Interval bmin bmax) = 
+    Interval (min amin bmin) (max amax bmax) 
+enclosingInterval Empty i = i 
+enclosingInterval i Empty = i 

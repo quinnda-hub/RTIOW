@@ -15,6 +15,7 @@ component for ray tracing, enabling the rendering of spherical objects in a scen
 
 module Sphere where
 
+import           AABB     (makeAABB, enclosingAABB)
 import           Hittable (Hit (..), Hittable (..), Material (..))
 import           Interval (contains)
 import           Math     (R)
@@ -26,9 +27,9 @@ data Sphere = StaticSphere { sphereCenter   :: !Vec3
                            , sphereRadius   :: !R
                            , sphereMaterial :: !Material
                            }
-            | MovingSphere { sphereCenterRay    :: !Ray
-                           , sphereRadius       :: !R
-                           , sphereMaterial     :: !Material }
+            | MovingSphere { sphereCenterRay :: !Ray
+                           , sphereRadius    :: !R
+                           , sphereMaterial  :: !Material }
 
 instance Hittable Sphere where
     {-# INLINE hit #-}
@@ -56,6 +57,19 @@ instance Hittable Sphere where
                              outwardNormal   = (p ^-^ center) ^/ radius
                              (normal, front) = setFaceNormal ray outwardNormal
                          in Just (Hit p normal root front (sphereMaterial sphere))
+
+    boundingBox (StaticSphere center radius _) = createStaticSphereBBox center radius
+      where
+        createStaticSphereBBox c r =
+            let radiusVec = Vec3 r r r
+            in makeAABB (c^-^radiusVec) (c^+^radiusVec)
+    boundingBox sphere@(MovingSphere _ radius _) = 
+        let radiusVec = Vec3 radius radius radius
+            center1 = sphereCenterAt sphere 0 
+            center2 = sphereCenterAt sphere 1 
+            box1 = makeAABB (center1^-^radiusVec) (center1^+^radiusVec)
+            box2 = makeAABB (center2^-^radiusVec) (center2^+^radiusVec)
+        in enclosingAABB box1 box2
 
 {-# INLINE sphereCenterAt #-}
 -- Calculate the center of a moving sphere at a given time.

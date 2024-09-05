@@ -17,7 +17,7 @@ The key functions provided are:
 
 module AABB where
 
-import           Interval (Interval (..))
+import           Interval (Interval (..), enclosingInterval)
 import Vec3 (Vec3(..))
 import Ray (Ray(..))
 
@@ -46,3 +46,10 @@ hitAABB (AABB x y z) (Ray origin direction _) rayT =
                 (tMin, tMax) = if t0 < t1 then (t0, t1) else (t1, t0)
                 newRayT = Interval (max (iMin rayT) tMin) (min (iMax rayT) tMax)
                 in acc && iMax newRayT > iMin newRayT
+
+-- Constructs an AABB from two existing AABBs. 
+enclosingAABB :: AABB -> AABB -> AABB 
+enclosingAABB (AABB ax ay az) (AABB bx by bz) = 
+  AABB (enclosingInterval ax bx) (enclosingInterval ay by) (enclosingInterval az bz) 
+enclosingAABB AABBEmpty aabb = aabb 
+enclosingAABB aabb AABBEmpty = aabb 

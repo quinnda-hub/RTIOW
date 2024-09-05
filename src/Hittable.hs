@@ -1,6 +1,6 @@
 {-# LANGUAGE GADTs #-}
 
-{- | 
+{- |
 Module      :  Hittable
 Copyright   :  (c) Quinn Anhorn 2024
 License     :  BSD3 (see LICENSE)
@@ -8,16 +8,17 @@ Maintainer  :  qda869@usask.ca
 Stability   :  experimental
 
 This module defines the `Hittable` class, the `Hit` data type, and various
-material types (`Lambertian`, `Metal`, `Dialectric`) that implement the 
-`Scatterable` class. The `Hittable` class is used to determine if a ray 
-intersects an object, while the `Scatterable` class describes how rays 
-interact with materials upon intersection. The module also provides utility 
-functions like `hitList` for checking intersections across a collection of 
+material types (`Lambertian`, `Metal`, `Dialectric`) that implement the
+`Scatterable` class. The `Hittable` class is used to determine if a ray
+intersects an object, while the `Scatterable` class describes how rays
+interact with materials upon intersection. The module also provides utility
+functions like `hitList` for checking intersections across a collection of
 objects and implements the Schlick approximation for reflectivity.
 -}
 
 module Hittable where
 
+import           AABB                (AABB)
 import           Control.Applicative ((<|>))
 import           Data.List           (foldl')
 import           Interval            (Interval (..), interval)
@@ -42,8 +43,9 @@ data Hit = Hit { hitPoint     :: !Vec3     -- The point of intersection.
 class Hittable a where
     hit :: a         -- Some object 'a'.
         -> Ray       -- A ray.
-        -> Interval
+        -> Interval  
         -> Maybe Hit
+    boundingBox :: a -> AABB
 
 {-# INLINE hitList #-}
 hitList :: Foldable t =>
