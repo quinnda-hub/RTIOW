@@ -18,7 +18,7 @@ objects and implements the Schlick approximation for reflectivity.
 
 module Hittable where
 
-import           AABB                (AABB)
+import           AABB                (AABB (AABBEmpty), enclosingAABB)
 import           Control.Applicative ((<|>))
 import           Data.List           (foldl')
 import           Interval            (Interval (..), interval)
@@ -31,8 +31,6 @@ import           Vec3                (RGB, Vec3 (..), nearZero, negateV,
                                       normalize, reflect, refract, (<.>), (^*),
                                       (^+^))
 
-type World = [Ray -> Interval -> Maybe Hit]
-
 data Hit = Hit { hitPoint     :: !Vec3     -- The point of intersection.
                , hitNormal    :: !Vec3     -- The normal at the intersection.
                , hitT         :: !R        -- The t parameter where the intersection occurs.
@@ -43,9 +41,29 @@ data Hit = Hit { hitPoint     :: !Vec3     -- The point of intersection.
 class Hittable a where
     hit :: a         -- Some object 'a'.
         -> Ray       -- A ray.
-        -> Interval  
+        -> Interval
         -> Maybe Hit
     boundingBox :: a -> AABB
+
+data World = World { getHittables :: [Object]
+                   , getWorldBox  :: AABB
+                   }
+
+type Object = Ray -> Interval -> Maybe Hit
+
+emptyWorld :: World
+emptyWorld = World { getHittables = [], getWorldBox = AABBEmpty}
+
+addObject :: Hittable a =>
+             World
+          -> a
+          -> World
+addObject (World objs box) newObj =
+    let newbox = enclosingAABB box (boundingBox newObj)
+    in World {getHittables = objs ++ [hit newObj], getWorldBox = newbox}
+
+hitWorld :: World -> Ray -> Interval -> Maybe Hit
+hitWorld (World objs _) = hitList objs
 
 {-# INLINE hitList #-}
 hitList :: Foldable t =>

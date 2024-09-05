@@ -48,6 +48,7 @@ surrounds :: Interval -> R -> Bool
 surrounds (Interval a b) x = a < x && x < b
 surrounds Empty _          = False
 
+-- Constrains a value to lie within the interval. 
 clamp :: Interval -> R -> R
 clamp (Interval a b) x
     | x < a     = a
@@ -55,6 +56,7 @@ clamp (Interval a b) x
     | otherwise = x
 clamp Empty x = x
 
+-- Expands the interval by a given value.
 expand :: Interval -> R -> Interval 
 expand (Interval a b) x = 
     let padding = x / 2 

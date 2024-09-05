@@ -26,9 +26,9 @@ import           Data.Text                   (Text)
 import           Data.Text.IO                (writeFile)
 import qualified Data.Text.Lazy              as TL
 import qualified Data.Text.Lazy.Builder      as TB
-import           Hittable                    (World)
+import           Hittable                    (Object)
 import           Interval                    (Interval (Interval), clamp)
-import           Math                        (linear2Gamma, R)
+import           Math                        (R, linear2Gamma)
 import           Random                      (sampleFraction)
 import           System.Directory            (createDirectoryIfMissing,
                                               renameFile)
@@ -41,7 +41,7 @@ data Image = Image { imageWidth   :: !Int
                    , imageHeight  :: !Int
                    , imageColours :: ![RGB]}
 
-renderImage :: Camera -> World -> Int -> Image
+renderImage :: Camera -> [Object] -> Int -> Image
 renderImage camera@(Camera { camImageWidth = width, camImageHeight = height, camSamplesPerPixel = samples }) world depth =
     let coords  = [(a, b) | a <- [00..height-1], b <- [0..width-1]]
         colours = map computeColour coords `using` parListChunk 128 rdeepseq
@@ -58,15 +58,15 @@ renderImage camera@(Camera { camImageWidth = width, camImageHeight = height, cam
 
     accumulateColour :: RandomGen g => g -> Int -> RGB -> R -> R -> RGB
     accumulateColour _ 0 accColour _ _ = accColour ^* (1 / fromIntegral samples)
-    accumulateColour gen remainingSamples accColour baseU baseV = 
+    accumulateColour gen remainingSamples accColour baseU baseV =
         let (ray, g') = getRay camera baseU baseV gen
             colour    = rayColour g' depth world ray
         in accumulateColour g' (remainingSamples - 1) (accColour ^+^ colour) baseU baseV
 
-writeImage :: Camera -> World -> Int -> IO ()
+writeImage :: Camera -> [Object] -> Int -> IO ()
 writeImage camera world raysPerSample = do
     createDirectoryIfMissing True "images"
-    
+
     start <- getSecondsNow
     let image = renderImage camera world raysPerSample
         tmpFilename = "images/tmp.ppm"
@@ -78,7 +78,7 @@ writeImage camera world raysPerSample = do
 
     saveImage tmpFilename $ image2PPM image
     renameFile tmpFilename filename
-    
+
     end <- getSecondsNow
     let elapsed = end - start
         pixelRate = fromIntegral (camImageHeight camera * camImageWidth camera) / elapsed

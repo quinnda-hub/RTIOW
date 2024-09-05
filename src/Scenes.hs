@@ -1,6 +1,6 @@
 module Scenes where
 import           Data.Foldable (Foldable (foldl'))
-import           Hittable      (Hit, Material (..), World, hit)
+import           Hittable      (Hit, Material (..), Object, hit)
 import           Interval      (Interval)
 import           Random        (arbitraryVec3, arbitraryVec3InRange,
                                 sampleFraction, sampleFractionInRange)
@@ -9,7 +9,7 @@ import           Sphere        (Sphere (..))
 import           System.Random (StdGen, mkStdGen)
 import           Vec3          (Vec3 (..), magnitude, (^*^), (^-^))
 
-staticBalls :: Int -> World
+staticBalls :: Int -> [Object]
 staticBalls seed = ground ++ fixed ++ randomObjects
   where
     ground = [hit $ StaticSphere (Vec3 0 (-1000) 0) 1000 (Lambertian (Vec3 0.5 0.5 0.5))]
@@ -39,14 +39,14 @@ staticBalls seed = ground ++ fixed ++ randomObjects
                   | chooseMat < 0.95 = Metal (Vec3 (0.5 + 0.5 * x1) (0.5 + 0.5 * y1) (0.5 + 0.5 * z1)) (0.5 * d1)
                   | otherwise = Dialectric 1.5
                   where Vec3 x1 y1 z1 = p1
-                obj = hit $ StaticSphere center 0.2 mat 
+                obj = hit $ StaticSphere center 0.2 mat
 
     fixed = [ hit $ StaticSphere (Vec3 0 1 0) 1 (Dialectric 1.5)
             , hit $ StaticSphere (Vec3 (-4) 1 0) 1 (Lambertian (Vec3 0.4 0.2 0.1))
             , hit $ StaticSphere (Vec3 4 1 0) 1 (Metal (Vec3 0.7 0.6 0.5) 0)
             ]
 
-bouncingBalls :: Int -> World
+bouncingBalls :: Int -> [Object]
 bouncingBalls seed = ground ++ fixed ++ randomObjects
   where
     ground = [hit $ StaticSphere (Vec3 0 (-1000) 0) 1000 (Lambertian (Vec3 0.5 0.5 0.5))]
