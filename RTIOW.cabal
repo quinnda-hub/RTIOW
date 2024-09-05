@@ -60,6 +60,7 @@ library
 
     -- Modules exported by the library.
     exposed-modules:  AABB,
+                      BVH,
                       Camera,
                       Hittable,
                       Image,

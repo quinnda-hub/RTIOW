@@ -19,7 +19,8 @@ module AABB where
 
 import           Interval (Interval (..), enclosingInterval)
 import           Ray      (Ray (..))
-import           Vec3     (Vec3 (..))
+import           Vec3     (Vec3 (..), zeroV)
+import Math (R)
 
 data AABB = AABB { xInterval, yInterval, zInterval :: Interval}
                  | AABBEmpty
@@ -53,3 +54,23 @@ enclosingAABB (AABB ax ay az) (AABB bx by bz) =
   AABB (enclosingInterval ax bx) (enclosingInterval ay by) (enclosingInterval az bz)
 enclosingAABB AABBEmpty aabb = aabb
 enclosingAABB aabb AABBEmpty = aabb
+
+-- Get the minimum point from an AABB. 
+boundingBoxMin :: AABB -> Vec3
+boundingBoxMin (AABB x y z) = Vec3 (iMin x) (iMin y) (iMin z)
+boundingBoxMin AABBEmpty    = zeroV
+
+-- Get the max point of an AABB.
+boundingBoxMax :: AABB -> Vec3
+boundingBoxMax (AABB x y z) = Vec3 (iMax x) (iMax y) (iMax z)
+boundingBoxMax AABBEmpty    = zeroV
+
+longestAxis :: AABB -> (Vec3 -> R) 
+longestAxis (AABB x y z) = 
+  let xSize = iMax x - iMin x 
+      ySize = iMax y - iMin y 
+      zSize = iMax z - iMin z 
+  in if xSize > ySize 
+    then if zSize > zSize then xComp else zComp
+    else if ySize > zSize then yComp else zComp
+longestAxis AABBEmpty = xComp -- Just use the x axis as a default for an empty AABB.
