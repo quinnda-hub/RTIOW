@@ -13,10 +13,12 @@ scene. Functions like `createCamera` and `getRay` are provided to set
 up and use the camera, and `rayColour` is used to compute the color of
 rays as they interact with objects in the scene.
 -}
+{-# LANGUAGE BangPatterns #-}
 
 module Camera where
 
-import           Hittable      (Hit (..), Scatterable (scatter), Hittable (..))
+import           BVH           (BVHNode)
+import           Hittable      (Hit (..), Hittable (..), Scatterable (scatter))
 import           Interval      (interval)
 import           Math          (R, degrees2Radians, infinity)
 import           Random        (randomInUnitDisk, sampleFraction)
@@ -24,7 +26,6 @@ import           Ray           (Ray (..))
 import           System.Random (RandomGen)
 import           Vec3          (RGB, Vec3 (..), negateV, normalize, zeroV, (*^),
                                 (><), (^*), (^*^), (^+^), (^-^))
-import BVH (BVHNode)
 
 data Camera = Camera { camLowerLeftCorner :: Vec3
                      , camHorizontal      :: Vec3
@@ -116,12 +117,12 @@ rayColour g maxDepth bvh r = loop g maxDepth r (Vec3 1 1 1)
         case hit bvh ray (interval 0.001 infinity) of
             Just hitRecord@(Hit _ _ _ _ m) ->
                 case scatter m ray hitRecord gen of
-                    (Just (scatteredRay, attenuation), gen') ->
+                    (Just (!scatteredRay, !attenuation), gen') ->
                         let newAcc = acc ^*^ attenuation
                         in loop gen' (depth - 1) scatteredRay newAcc
                     (Nothing, _) -> zeroV
             Nothing ->
-                let unitDirection = normalize (rayDirection ray)
-                    t = 0.5 * (yComp unitDirection + 1.0)
+                let !unitDirection = normalize (rayDirection ray)
+                    !t = 0.5 * (yComp unitDirection + 1.0)
                     background = (1.0 - t) *^ Vec3 1 1 1 ^+^ t *^ Vec3 0.5 0.7 1.0
                 in acc ^*^ background
