@@ -108,16 +108,19 @@ rayColour :: RandomGen g
           -> BVHNode
           -> Ray
           -> RGB
-rayColour _ 0 _ _ = zeroV
-rayColour g d bvh r =
-    case hit bvh r (interval 0.001 infinity) of
-        Just hitRecord@(Hit _ _ _ _ m) ->
-            case scatter m r hitRecord g of
-                (Just (scatteredRay, attenuation), g') ->
-                    attenuation ^*^ rayColour g' (d-1) bvh scatteredRay
-                (Nothing, _) ->
-                    zeroV
-        Nothing ->
-            let unitDirection = normalize (rayDirection r)
-                t = 0.5 * (yComp unitDirection + 1.0)
-            in (1.0 - t) *^ Vec3 1 1 1 ^+^ t *^ Vec3 0.5 0.7 1.0
+rayColour g maxDepth bvh r = loop g maxDepth r (Vec3 1 1 1)
+  where
+    loop _ 0 _ acc = acc
+    loop gen depth ray acc =
+        case hit bvh ray (interval 0.001 infinity) of
+            Just hitRecord@(Hit _ _ _ _ m) ->
+                case scatter m ray hitRecord gen of
+                    (Just (scatteredRay, attenuation), gen') ->
+                        let newAcc = acc ^*^ attenuation
+                        in loop gen' (depth - 1) scatteredRay newAcc
+                    (Nothing, _) -> zeroV
+            Nothing ->
+                let unitDirection = normalize (rayDirection ray)
+                    t = 0.5 * (yComp unitDirection + 1.0)
+                    background = (1.0 - t) *^ Vec3 1 1 1 ^+^ t *^ Vec3 0.5 0.7 1.0
+                in acc ^*^ background
