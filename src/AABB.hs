@@ -35,18 +35,27 @@ makeAABB (Vec3 ax ay az) (Vec3 bx by bz) = AABB x y z
     z = if az <= bz then Interval az bz else Interval bz az
 
 -- Checks if a ray intersects with the given AABB.
-{-# INLINE hitAABB #-}
 hitAABB :: AABB -> Ray -> Interval -> Bool
 hitAABB AABBEmpty _ _ = False
 hitAABB (AABB x y z) (Ray origin direction _) rayT =
-    let checkAxis interval compFunc =
-          let invDir  = 1.0 / compFunc direction
-              t0      = (iMin interval - compFunc origin) * invDir
-              t1      = (iMax interval - compFunc origin) * invDir
-              (tMin, tMax) = if t0 < t1 then (t0, t1) else (t1, t0)
-              newRayT = Interval (max (iMin rayT) tMin) (min (iMax rayT) tMax)
-          in iMax newRayT > iMin newRayT
-    in checkAxis x xComp && checkAxis y yComp && checkAxis z zComp
+    let invDirX = 1.0 / xComp direction
+        invDirY = 1.0 / yComp direction
+        invDirZ = 1.0 / zComp direction
+        tMin = iMin rayT
+        tMax = iMax rayT
+
+        checkAxis minVal maxVal originComp invDir =
+          let t0 = (minVal - originComp) * invDir
+              t1 = (maxVal - originComp) * invDir
+              (tMin', tMax') = if t0 < t1 then (t0, t1) else (t1, t0)
+              tMinNew = max tMin tMin'
+              tMaxNew = min tMax tMax'
+          in tMaxNew > tMinNew
+
+    in checkAxis (iMin x) (iMax x) (xComp origin) invDirX &&
+       checkAxis (iMin y) (iMax y) (yComp origin) invDirY &&
+       checkAxis (iMin z) (iMax z) (zComp origin) invDirZ
+
 
 -- Constructs an AABB from two existing AABBs.
 enclosingAABB :: AABB -> AABB -> AABB

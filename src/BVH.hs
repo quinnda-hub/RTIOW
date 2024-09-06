@@ -9,7 +9,6 @@ data BVHNode = BVHLeaf !SomeHittable !AABB            -- Leaf node.
              | BVHBranch !BVHNode !BVHNode !AABB -- Internal node containing two children.
 
 buildBVH :: [SomeHittable] -> BVHNode
-buildBVH [] = undefined
 buildBVH [hittable@(SomeHittable obj)] = BVHLeaf hittable (boundingBox obj)
 buildBVH objects =
     let bbox     = foldr (\(SomeHittable obj) acc -> enclosingAABB (boundingBox obj) acc) AABBEmpty objects
