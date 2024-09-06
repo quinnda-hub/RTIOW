@@ -53,7 +53,7 @@ createCamera :: R        -- Aspect ratio
              -> R        -- Aperture (determines the amount of defocus blur)
              -> R        -- Focus distance (distance to the plane in perfect focus)
              -> Camera
-createCamera aspectRatio imageWidth samples fov lookFrom lookAt up aperture focusDist =
+createCamera aspectRatio imageWidth samples fov lookFrom lookAt up defocusDist focusDist =
     let theta           = degrees2Radians $ fromIntegral fov
         h               = tan (theta / 2)
         viewportHeight  = 2.0 * h * focusDist
@@ -67,9 +67,10 @@ createCamera aspectRatio imageWidth samples fov lookFrom lookAt up aperture focu
         horizontal      = viewportWidth *^ u
         vertical        = viewportHeight *^ negateV v
         lowerLeftCorner = origin ^-^ (horizontal ^* 0.5) ^-^ (vertical ^* 0.5) ^-^ (focusDist *^ w)
-        lensRadius      = aperture / 2.0
+
+        lensRadius      = focusDist * tan (degrees2Radians (defocusDist / 2.0))
         imageHeight     = round $ fromIntegral imageWidth / aspectRatio
-    in Camera lowerLeftCorner horizontal vertical origin imageWidth imageHeight samples fov lookFrom lookAt up lensRadius u v w (degrees2Radians focusDist)
+    in Camera lowerLeftCorner horizontal vertical origin imageWidth imageHeight samples fov lookFrom lookAt up lensRadius u v w focusDist
 
 getRay :: RandomGen g
        => Camera

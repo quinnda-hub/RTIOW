@@ -11,7 +11,7 @@ aspectRatio :: R
 aspectRatio = 16 / 9
 
 imageWidth :: Int
-imageWidth = 400
+imageWidth = 1200
 
 camera :: Camera
 camera = createCamera aspectRatio imageWidth 100 20 (Vec3 13 2 3) (Vec3 0 0 0) (Vec3 0 1 0) 0.6 10
