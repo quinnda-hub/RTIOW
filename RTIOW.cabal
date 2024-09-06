@@ -121,6 +121,7 @@ executable RTIOW
     default-language: Haskell2010
 
     ghc-options: -O2
+                 -funbox-strict-fields
                  -threaded
 
 test-suite RTIOW-test
