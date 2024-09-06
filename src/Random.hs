@@ -21,21 +21,21 @@ import           System.Random (Random (randomR), RandomGen, random)
 import           Vec3          (Vec3 (..), lengthSquared, magnitude, negateV,
                                 normalize, (<.>))
 
-{-# INLINE sampleFraction #-}
+{-# INLINEABLE sampleFraction #-}
 sampleFraction :: RandomGen g  => g -> (R, g)
 sampleFraction = randomR (0, 1)
 
 sampleFractionInRange :: RandomGen g => g -> R -> R -> (R, g)
 sampleFractionInRange gen a b = randomR (min a b, max a b) gen 
 
-{-# INLINE sampleSquare #-}
+{-# INLINEABLE sampleSquare #-}
 sampleSquare :: RandomGen g => g -> ((R, R), g)
 sampleSquare gen =
     let (x, gen')  = randomR (-0.5, 0.5) gen
         (y, gen'') = randomR (-0.5, 0.5) gen'
     in ((x, y), gen'')
 
-{-# INLINE arbitraryVec3 #-}
+{-# INLINEABLE arbitraryVec3 #-}
 arbitraryVec3 :: RandomGen g => g -> (Vec3, g)
 arbitraryVec3 gen =
     let (x, gen')   = random gen
@@ -43,7 +43,7 @@ arbitraryVec3 gen =
         (z, gen''') = random gen''
     in (Vec3 x y z, gen''')
 
-{-# INLINE arbitraryVec3InRange #-}
+{-# INLINEABLE arbitraryVec3InRange #-}
 arbitraryVec3InRange :: RandomGen g => R -> R -> g -> (Vec3, g)
 arbitraryVec3InRange minVal maxVal gen =
     let (x, gen')  = randomR (minVal, maxVal) gen
@@ -51,19 +51,19 @@ arbitraryVec3InRange minVal maxVal gen =
         (z, gen''') = randomR (minVal, maxVal) gen''
     in (Vec3 x y z, gen''')
 
-{-# INLINE randomInUnitSphere #-}
+{-# INLINEABLE randomInUnitSphere #-}
 randomInUnitSphere :: RandomGen g => g -> (Vec3, g)
 randomInUnitSphere gen =
     let (p, gen') = arbitraryVec3InRange (-1) 1 gen
     in if lengthSquared p < 1 then (p, gen') else randomInUnitSphere gen'
 
-{-# INLINE randomUnitVector #-}
+{-# INLINEABLE randomUnitVector #-}
 randomUnitVector :: RandomGen g => g -> (Vec3, g)
 randomUnitVector gen =
     let (v, gen') = randomInUnitSphere gen
     in  (normalize v, gen')
 
-{-# INLINE randomVec3Hemisphere #-}
+{-# INLINEABLE randomVec3Hemisphere #-}
 randomVec3Hemisphere :: RandomGen g => g -> Vec3 -> (Vec3, g)
 randomVec3Hemisphere gen normal =
     let (onUnitSphere, gen') = randomUnitVector gen
@@ -72,7 +72,7 @@ randomVec3Hemisphere gen normal =
             then (onUnitSphere, gen')
             else (negateV onUnitSphere, gen')
 
-{-# INLINE randomInUnitDisk #-}
+{-# INLINEABLE randomInUnitDisk #-}
 randomInUnitDisk :: RandomGen g => g -> (Vec3, g)
 randomInUnitDisk g =
     let (x, g') = randomR (-1, 1) g
