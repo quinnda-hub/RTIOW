@@ -69,7 +69,7 @@ createCamera aspectRatio imageWidth samples fov lookFrom lookAt up aperture focu
         lowerLeftCorner = origin ^-^ (horizontal ^* 0.5) ^-^ (vertical ^* 0.5) ^-^ (focusDist *^ w)
         lensRadius      = aperture / 2.0
         imageHeight     = round $ fromIntegral imageWidth / aspectRatio
-    in Camera lowerLeftCorner horizontal vertical origin imageWidth imageHeight samples fov lookFrom lookAt up lensRadius u v w focusDist
+    in Camera lowerLeftCorner horizontal vertical origin imageWidth imageHeight samples fov lookFrom lookAt up lensRadius u v w (degrees2Radians focusDist)
 
 getRay :: RandomGen g
        => Camera
