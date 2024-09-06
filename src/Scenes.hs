@@ -1,4 +1,5 @@
 module Scenes where
+  
 import           Data.Foldable (Foldable (foldl'))
 import           Hittable      (Material (..), SomeHittable (SomeHittable))
 import           Random        (arbitraryVec3, arbitraryVec3InRange,

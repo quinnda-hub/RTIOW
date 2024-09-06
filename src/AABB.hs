@@ -1,3 +1,5 @@
+{-# LANGUAGE BangPatterns #-}
+
 {- |
 Module      :  AABB
 Copyright   :  (c) Quinn Anhorn 2024
@@ -14,7 +16,6 @@ The key functions provided are:
   * `hitAABB`: Checks if a ray intersects with the AABB, taking into account the ray's direction and a valid t-interval. It iterates over the three axes, adjusting the ray's t-interval as necessary to determine whether the ray passes through the bounding box.
 
 -}
-{-# LANGUAGE BangPatterns #-}
 
 module AABB where
 
@@ -76,6 +77,7 @@ boundingBoxMax :: AABB -> Vec3
 boundingBoxMax (AABB x y z) = Vec3 (iMax x) (iMax y) (iMax z)
 boundingBoxMax AABBEmpty    = zeroV
 
+-- Find the longest axis of an AABB.
 longestAxis :: AABB -> (Vec3 -> R)
 longestAxis (AABB x y z) =
   let xSize = iMax x - iMin x
