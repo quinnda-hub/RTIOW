@@ -102,6 +102,7 @@ getRay camera baseU baseV gen =
     -- Create the ray
     ray = Ray orig direction time
 
+{-# INLINE rayColour #-}
 rayColour :: RandomGen g
           => g
           -> Int -- Max recursion depth.

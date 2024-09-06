@@ -35,6 +35,7 @@ makeAABB (Vec3 ax ay az) (Vec3 bx by bz) = AABB x y z
     z = if az <= bz then Interval az bz else Interval bz az
 
 -- Checks if a ray intersects with the given AABB.
+{-# INLINE hitAABB #-}
 hitAABB :: AABB -> Ray -> Interval -> Bool
 hitAABB AABBEmpty _ _ = False
 hitAABB (AABB x y z) (Ray origin direction _) rayT =
@@ -43,7 +44,7 @@ hitAABB (AABB x y z) (Ray origin direction _) rayT =
         invDirZ = 1.0 / zComp direction
         tMin = iMin rayT
         tMax = iMax rayT
-
+        {-# INLINE checkAxis #-}
         checkAxis minVal maxVal originComp invDir =
           let t0 = (minVal - originComp) * invDir
               t1 = (maxVal - originComp) * invDir
