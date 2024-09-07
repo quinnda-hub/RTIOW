@@ -70,6 +70,7 @@ library
                       Ray,
                       Scenes,
                       Sphere,
+                      Texture,
                       Vec3,
                       Utils
 
