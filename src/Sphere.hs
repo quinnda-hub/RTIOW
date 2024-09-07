@@ -56,7 +56,7 @@ instance Hittable Sphere where
                     else let p               = rayAt ray root
                              outwardNormal   = (p ^-^ center) ^/ radius
                              (normal, front) = setFaceNormal ray outwardNormal
-                             texCoords       = sphereUV ((p ^-^ center) ^/ radius)
+                             texCoords       = sphereUV outwardNormal
                          in Just (Hit p normal root front (sphereMaterial sphere) texCoords)
 
     boundingBox (StaticSphere center radius _) = createStaticSphereBBox center radius
