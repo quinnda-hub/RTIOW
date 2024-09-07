@@ -116,7 +116,7 @@ rayColour g maxDepth bvh r = loop g maxDepth r (Vec3 1 1 1)
     loop _ 0 _ acc = acc
     loop gen depth ray acc =
         case hit bvh ray (interval 0.001 infinity) of
-            Just hitRecord@(Hit _ _ _ _ m) ->
+            Just hitRecord@(Hit _ _ _ _ m _) ->
                 case scatter m ray hitRecord gen of
                     (Just (!scatteredRay, !attenuation), gen') ->
                         let newAcc = acc ^*^ attenuation

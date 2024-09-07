@@ -26,6 +26,7 @@ import           Random        (randomInUnitSphere, randomUnitVector,
                                 sampleFraction)
 import           Ray           (Ray (..))
 import           System.Random (RandomGen)
+import           Texture       (SomeTexture, Texture (..))
 import           Vec3          (RGB, Vec3 (..), nearZero, negateV, normalize,
                                 reflect, refract, (<.>), (^*), (^+^))
 
@@ -34,6 +35,7 @@ data Hit = Hit { hitPoint     :: !Vec3     -- The point of intersection.
                , hitT         :: !R        -- The t parameter where the intersection occurs.
                , hitFrontFace :: !Bool     -- Whether the intersection is on the front face.
                , hitMaterial  :: !Material -- The material of the object that was hit.
+               , hitTexCoords :: !(R, R)   -- Texture coordinates.
                }
 
 class Hittable a where
@@ -54,19 +56,21 @@ class Scatterable a where
     scatter :: RandomGen g => a -> Ray -> Hit -> g -> (Maybe (Ray, RGB), g)
 
 data Material where
-    Lambertian :: RGB -> Material
+    Lambertian :: SomeTexture -> Material
     Metal      :: RGB -> R -> Material
     Dialectric :: R -> Material
 
 instance Scatterable Material where
-    scatter (Lambertian albedo) (Ray _ _ time) (Hit p normal _ _ _) g =
+    {-# INLINE scatter #-}
+    scatter (Lambertian texture) (Ray _ _ time) (Hit p normal _ _ _ (u, v)) g =
         let (sampled, g') = randomUnitVector g
             direction     = sampled ^+^ normal
             direction'    = if nearZero direction then normal else direction
             scattered     = Ray p direction' time
-        in (Just (scattered, albedo), g')
+            attenuation   = value texture (u, v) p
+        in (Just (scattered, attenuation), g')
 
-    scatter (Metal albedo fuzz) (Ray _ direction time) (Hit p normal _ _ _) g =
+    scatter (Metal albedo fuzz) (Ray _ direction time) (Hit p normal _ _ _ _) g =
         let (sampled, g')   = randomInUnitSphere g
             reflected       = reflect (normalize direction) normal
             scattered       = Ray p (reflected ^+^ sampled ^* min fuzz 1.0) time

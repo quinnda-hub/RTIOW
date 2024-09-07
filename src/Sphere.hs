@@ -56,7 +56,8 @@ instance Hittable Sphere where
                     else let p               = rayAt ray root
                              outwardNormal   = (p ^-^ center) ^/ radius
                              (normal, front) = setFaceNormal ray outwardNormal
-                         in Just (Hit p normal root front (sphereMaterial sphere))
+                             texCoords       = sphereUV ((p ^-^ center) ^/ radius)
+                         in Just (Hit p normal root front (sphereMaterial sphere) texCoords)
 
     boundingBox (StaticSphere center radius _) = createStaticSphereBBox center radius
       where
@@ -71,9 +72,18 @@ instance Hittable Sphere where
             box2 = makeAABB (center2^-^radiusVec) (center2^+^radiusVec)
         in enclosingAABB box1 box2
 
-{-# INLINE sphereCenterAt #-}
+{-# INLINEABLE sphereCenterAt #-}
 -- Calculate the center of a moving sphere at a given time.
 sphereCenterAt :: Sphere -> R -> Vec3
 sphereCenterAt (StaticSphere center _ _) _ = center
 sphereCenterAt (MovingSphere centerRay _ _) time =
     rayOrigin centerRay ^+^ (rayDirection centerRay ^* time)
+
+{-#  INLINEABLE sphereUV #-}
+sphereUV :: Vec3 -> (R, R) 
+sphereUV (Vec3 x y z) = 
+    let theta = atan2 z x -- Angle in the xz-plane.
+        phi   = asin y    -- Angle from the y-axis.     
+        u     = 1-(theta+pi) / (2*pi) -- Normalize to [0, 1]. 
+        v     = (phi+pi/2) / pi       -- Normalize to [0, 1]. 
+    in (u, v)
