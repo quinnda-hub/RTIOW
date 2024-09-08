@@ -1,3 +1,21 @@
+{- |
+Module      :  Texture
+Copyright   :  (c) Quinn Anhorn 2024
+License     :  BSD3 (see LICENSE)
+Maintainer  :  qda869@usask.ca
+Stability   :  experimental
+
+This module defines the `Texture` data type and provides a way to handle 
+different types of textures in a ray tracing context. The `Texture` type
+includes solid color textures and checkerboard patterns, which can be 
+sampled at given points in space to determine their color. The `textureValue` 
+function is used to evaluate the color of a texture based on coordinates 
+and the position of a point in space. The module also provides utility 
+functions for creating checkerboard textures from solid colors and for 
+scaling textures.
+
+-}
+
 module Texture where
 
 import           Math (R)
