@@ -31,9 +31,9 @@ infixl 7 ^*
 infixl 7 ^/
 infixl 7 <.>
 
-data Vec3 = Vec3 { xComp :: !R
-                 , yComp :: !R
-                 , zComp :: !R
+data Vec3 = Vec3 { xComp :: {-# UNPACK #-} !R
+                 , yComp :: {-# UNPACK #-} !R
+                 , zComp :: {-# UNPACK #-} !R
                  } deriving (Eq)
 
 type RGB = Vec3
