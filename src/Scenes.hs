@@ -130,3 +130,10 @@ bouncingBallsCheckered seed = ground ++ fixed ++ randomObjects
             , SomeHittable $ StaticSphere (Vec3 (-4) 1 0) 1 (Lambertian $ SolidColour (Vec3 0.4 0.2 0.1))
             , SomeHittable $ StaticSphere (Vec3 4 1 0) 1 (Metal (Vec3 0.7 0.6 0.5) 0)
             ]
+
+checkeredSpheres :: [SomeHittable]
+checkeredSpheres = [sphere1, sphere2] 
+  where 
+    checker = checkerTextureFromColours 0.32 (Vec3 0.0 0.0 0.0) (Vec3 0.9 0.9 0.9)
+    sphere1 = SomeHittable $ StaticSphere (Vec3 0 (-10) 0) 10 (Lambertian checker)
+    sphere2 = SomeHittable $ StaticSphere (Vec3 0 10 0) 10 (Lambertian checker)

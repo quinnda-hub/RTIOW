@@ -14,7 +14,6 @@ The key functions provided are:
   * `makeAABB`: Constructs an AABB from two 3D points, treating them as the minimum and maximum extrema.
 
   * `hitAABB`: Checks if a ray intersects with the AABB, taking into account the ray's direction and a valid t-interval. It iterates over the three axes, adjusting the ray's t-interval as necessary to determine whether the ray passes through the bounding box.
-
 -}
 
 module AABB where
@@ -24,7 +23,7 @@ import           Math     (R)
 import           Ray      (Ray (..))
 import           Vec3     (Vec3 (..), zeroV)
 
-data AABB = AABB { xInterval, yInterval, zInterval :: !Interval}
+data AABB = AABB { xInterval, yInterval, zInterval :: !Interval }
                  | AABBEmpty
                  deriving (Show, Eq)
 

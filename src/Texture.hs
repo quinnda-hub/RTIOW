@@ -13,7 +13,6 @@ function is used to evaluate the color of a texture based on coordinates
 and the position of a point in space. The module also provides utility 
 functions for creating checkerboard textures from solid colors and for 
 scaling textures.
-
 -}
 
 module Texture where

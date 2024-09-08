@@ -4,7 +4,7 @@ import           BVH    (BVHNode, buildBVH)
 import           Camera (Camera (..), createCamera)
 import           Image  (writeImage)
 import           Math   (R)
-import           Scenes (bouncingBallsCheckered)
+import           Scenes (checkeredSpheres)
 import           Vec3   (Vec3 (..))
 
 aspectRatio :: R
@@ -17,7 +17,7 @@ camera :: Camera
 camera = createCamera aspectRatio imageWidth 100 20 (Vec3 13 2 3) (Vec3 0 0 0) (Vec3 0 1 0) 0.6 10
 
 bvh :: BVHNode
-bvh = buildBVH (bouncingBallsCheckered 42)
+bvh = buildBVH checkeredSpheres
 
 main :: IO ()
 main = writeImage camera bvh 10
