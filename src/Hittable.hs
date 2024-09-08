@@ -26,7 +26,7 @@ import           Random        (randomInUnitSphere, randomUnitVector,
                                 sampleFraction)
 import           Ray           (Ray (..))
 import           System.Random (RandomGen)
-import           Texture       (SomeTexture, Texture (..))
+import           Texture       (Texture (..), textureValue)
 import           Vec3          (RGB, Vec3 (..), nearZero, negateV, normalize,
                                 reflect, refract, (<.>), (^*), (^+^))
 
@@ -56,7 +56,7 @@ class Scatterable a where
     scatter :: RandomGen g => a -> Ray -> Hit -> g -> (Maybe (Ray, RGB), g)
 
 data Material where
-    Lambertian :: SomeTexture -> Material
+    Lambertian :: Texture -> Material
     Metal      :: RGB -> R -> Material
     Dialectric :: R -> Material
 
@@ -67,7 +67,7 @@ instance Scatterable Material where
             direction     = sampled ^+^ normal
             direction'    = if nearZero direction then normal else direction
             scattered     = Ray p direction' time
-            attenuation   = value texture (u, v) p
+            attenuation   = textureValue texture (u, v) p
         in (Just (scattered, attenuation), g')
 
     scatter (Metal albedo fuzz) (Ray _ direction time) (Hit p normal _ _ _ _) g =

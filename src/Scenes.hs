@@ -7,15 +7,14 @@ import           Random        (arbitraryVec3, arbitraryVec3InRange,
 import           Ray           (Ray (..))
 import           Sphere        (Sphere (..))
 import           System.Random (StdGen, mkStdGen)
-import           Texture       (SolidColour (SolidColour),
-                                SomeTexture (SomeTexture),
+import           Texture       (Texture(..),
                                 checkerTextureFromColours)
 import           Vec3          (Vec3 (..), magnitude, (^*^), (^-^))
 
 staticBalls :: Int -> [SomeHittable]
 staticBalls seed = ground ++ fixed ++ randomObjects
   where
-    ground = [SomeHittable $ StaticSphere (Vec3 0 (-1000) 0) 1000 (Lambertian . SomeTexture $ SolidColour (Vec3 0.5 0.5 0.5))]
+    ground = [SomeHittable $ StaticSphere (Vec3 0 (-1000) 0) 1000 (Lambertian $ SolidColour (Vec3 0.5 0.5 0.5))]
 
     randomObjects = fst $ foldl' makeObject ([], mkStdGen seed) coordinates
       where
@@ -38,21 +37,21 @@ staticBalls seed = ground ++ fixed ++ randomObjects
                 (d1, _) = sampleFraction g5
                 col = p1 ^*^ p2
                 mat
-                  | chooseMat < 0.8 = Lambertian . SomeTexture $ SolidColour col
+                  | chooseMat < 0.8 = Lambertian $ SolidColour col
                   | chooseMat < 0.95 = Metal (Vec3 (0.5 + 0.5 * x1) (0.5 + 0.5 * y1) (0.5 + 0.5 * z1)) (0.5 * d1)
                   | otherwise = Dialectric 1.5
                   where Vec3 x1 y1 z1 = p1
                 obj = StaticSphere center 0.2 mat
 
     fixed = [ SomeHittable $ StaticSphere (Vec3 0 1 0) 1 (Dialectric 1.5)
-            , SomeHittable $ StaticSphere (Vec3 (-4) 1 0) 1 (Lambertian . SomeTexture $ SolidColour (Vec3 0.4 0.2 0.1))
+            , SomeHittable $ StaticSphere (Vec3 (-4) 1 0) 1 (Lambertian $ SolidColour (Vec3 0.4 0.2 0.1))
             , SomeHittable $ StaticSphere (Vec3 4 1 0) 1 (Metal (Vec3 0.7 0.6 0.5) 0)
             ]
 
 bouncingBalls :: Int -> [SomeHittable]
 bouncingBalls seed = ground ++ fixed ++ randomObjects
   where
-    ground = [SomeHittable $ StaticSphere (Vec3 0 (-1000) 0) 1000 (Lambertian . SomeTexture $ SolidColour (Vec3 0.5 0.5 0.5))]
+    ground = [SomeHittable $ StaticSphere (Vec3 0 (-1000) 0) 1000 (Lambertian $ SolidColour (Vec3 0.5 0.5 0.5))]
 
     randomObjects = fst $ foldl' makeObject ([], mkStdGen seed) coordinates
       where
@@ -76,7 +75,7 @@ bouncingBalls seed = ground ++ fixed ++ randomObjects
                 col = p1 ^*^ p2
                 displacement = Vec3 0.0 (fst (sampleFractionInRange g6 0.0 0.5)) 0.0
                 mat
-                  | chooseMat < 0.8 = Lambertian .  SomeTexture $ SolidColour col
+                  | chooseMat < 0.8 = Lambertian $ SolidColour col
                   | chooseMat < 0.95 = Metal (Vec3 (0.5 + 0.5 * x1) (0.5 + 0.5 * y1) (0.5 + 0.5 * z1)) (0.5 * d1)
                   | otherwise = Dialectric 1.5
                   where Vec3 x1 y1 z1 = p1
@@ -86,15 +85,15 @@ bouncingBalls seed = ground ++ fixed ++ randomObjects
 
 
     fixed = [ SomeHittable $ StaticSphere (Vec3 0 1 0) 1 (Dialectric 1.5)
-            , SomeHittable $ StaticSphere (Vec3 (-4) 1 0) 1 (Lambertian . SomeTexture $ SolidColour (Vec3 0.4 0.2 0.1))
+            , SomeHittable $ StaticSphere (Vec3 (-4) 1 0) 1 (Lambertian $ SolidColour (Vec3 0.4 0.2 0.1))
             , SomeHittable $ StaticSphere (Vec3 4 1 0) 1 (Metal (Vec3 0.7 0.6 0.5) 0)
             ]
 
 bouncingBallsCheckered :: Int -> [SomeHittable]
 bouncingBallsCheckered seed = ground ++ fixed ++ randomObjects
   where
-    checker = checkerTextureFromColours 0.32 (Vec3 0.2 0.3 0.1) (Vec3 0.9 0.9 0.9)
-    ground  = [SomeHittable $ StaticSphere (Vec3 0 (-1000) 0) 1000 (Lambertian $ SomeTexture checker)]
+    checker = checkerTextureFromColours 0.32 (Vec3 0.0 0.0 0.0) (Vec3 0.9 0.9 0.9)
+    ground  = [SomeHittable $ StaticSphere (Vec3 0 (-1000) 0) 1000 (Lambertian checker)]
 
     randomObjects = fst $ foldl' makeObject ([], mkStdGen seed) coordinates
       where
@@ -118,7 +117,7 @@ bouncingBallsCheckered seed = ground ++ fixed ++ randomObjects
                 col = p1 ^*^ p2
                 displacement = Vec3 0.0 (fst (sampleFractionInRange g6 0.0 0.5)) 0.0
                 mat
-                  | chooseMat < 0.8 = Lambertian .  SomeTexture $ SolidColour col
+                  | chooseMat < 0.8 = Lambertian $ SolidColour col
                   | chooseMat < 0.95 = Metal (Vec3 (0.5 + 0.5 * x1) (0.5 + 0.5 * y1) (0.5 + 0.5 * z1)) (0.5 * d1)
                   | otherwise = Dialectric 1.5
                   where Vec3 x1 y1 z1 = p1
@@ -128,6 +127,6 @@ bouncingBallsCheckered seed = ground ++ fixed ++ randomObjects
 
 
     fixed = [ SomeHittable $ StaticSphere (Vec3 0 1 0) 1 (Dialectric 1.5)
-            , SomeHittable $ StaticSphere (Vec3 (-4) 1 0) 1 (Lambertian . SomeTexture $ SolidColour (Vec3 0.4 0.2 0.1))
+            , SomeHittable $ StaticSphere (Vec3 (-4) 1 0) 1 (Lambertian $ SolidColour (Vec3 0.4 0.2 0.1))
             , SomeHittable $ StaticSphere (Vec3 4 1 0) 1 (Metal (Vec3 0.7 0.6 0.5) 0)
             ]
