@@ -1,23 +1,27 @@
 module Main where
 
-import           BVH    (BVHNode, buildBVH)
-import           Camera (Camera (..), createCamera)
-import           Image  (writeImage)
-import           Math   (R)
-import           Scenes (bouncingBallsCheckered)
-import           Vec3   (Vec3 (..))
+import           BVH     (buildBVH)
+import           Camera  (Camera (..), createCamera)
+import           Image   (loadImageFromFile, writeImage)
+import           Math    (R)
+import           Scenes  (earth)
+import           Texture (Texture (..))
+import           Vec3    (Vec3 (..))
 
 aspectRatio :: R
 aspectRatio = 16 / 9
 
 imageWidth :: Int
-imageWidth = 1200
+imageWidth = 3840
 
 camera :: Camera
 camera = createCamera aspectRatio imageWidth 100 20 (Vec3 13 2 3) (Vec3 0 0 0) (Vec3 0 1 0) 0.6 10
 
-bvh :: BVHNode
-bvh = buildBVH $ bouncingBallsCheckered 42
-
 main :: IO ()
-main = writeImage camera bvh 10
+main = do
+    tex <- loadImageFromFile "images/assets/world.jpg"
+    case tex of
+        Nothing -> putStrLn "Error loading image."
+        Just img ->
+            let scene = earth (ImageTexture img)
+            in writeImage camera (buildBVH scene) 10
