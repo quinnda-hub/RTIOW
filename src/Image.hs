@@ -19,6 +19,10 @@ performance.
 
 module Image where
 
+import           Codec.Picture               (Pixel (pixelAt), convertRGB8,
+                                              readImage)
+import qualified Codec.Picture.Types         as JP
+
 import           BVH                         (BVHNode)
 import           Camera                      (Camera (Camera, camImageHeight, camImageWidth, camSamplesPerPixel),
                                               getRay, rayColour)
@@ -106,3 +110,26 @@ image2PPM (Image width height colours) =
 
 saveImage :: FilePath -> Text -> IO ()
 saveImage path content = Data.Text.IO.writeFile path (content <> "\n")
+
+loadImageFromFile :: FilePath -> IO (Maybe Image)
+loadImageFromFile path = do
+    result <- readImage path
+    case result of
+        Left err -> do
+            putStrLn $ "Error loading image: " ++ err
+            return Nothing
+        Right dynImg -> do
+            let img = convertRGB8 dynImg
+            return $ Just (convertJuicyPixelsImage img)
+
+convertJuicyPixelsImage :: JP.Image JP.PixelRGB8 -> Image
+convertJuicyPixelsImage img = Image width height pixels
+    where
+        width  = JP.imageWidth img
+        height = JP.imageHeight img
+        pixels = [pixelToRGB (pixelAt img x y) | y <- [0..height-1], x <- [0..width-1]]
+
+pixelToRGB :: JP.PixelRGB8 -> RGB
+pixelToRGB (JP.PixelRGB8 r g b) = Vec3 (toRange r) (toRange g) (toRange b)
+    where
+        toRange c = fromIntegral c / 255.0
