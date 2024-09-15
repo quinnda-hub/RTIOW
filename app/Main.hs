@@ -19,7 +19,7 @@ camera = createCamera aspectRatio imageWidth 100 20 (Vec3 13 2 3) (Vec3 0 0 0) (
 
 main :: IO ()
 main = do
-    tex <- loadImageFromFile "images/assets/world.jpg"
+    tex <- loadImageFromFile "assets/world.jpg"
     case tex of
         Nothing -> putStrLn "Error loading image."
         Just img ->
