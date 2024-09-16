@@ -22,10 +22,12 @@ import qualified Codec.Picture.Types as JP
 import           Interval            (Interval (..), clamp)
 import           Math                (R)
 import           Vec3                (RGB, Vec3 (..))
+import Perlin (Perlin, perlinNoise)
 
 data Texture = SolidColour RGB
              | CheckerTexture R Texture Texture
              | ImageTexture (JP.Image JP.PixelRGB8)
+             | NoiseTexture Perlin
 
 textureValue :: Texture -> (R, R) -> Vec3 -> RGB
 textureValue (SolidColour colour) _ _ = colour
@@ -43,6 +45,9 @@ textureValue (ImageTexture img) (u, v) _ =
         i  = floor (u' * fromIntegral (imageWidth img))
         j  = floor (v' * fromIntegral (imageHeight img))
     in pixelToRGB $ pixelAt img (clampCoord i (imageWidth img)) (clampCoord j (imageHeight img))
+textureValue (NoiseTexture perlin) _ (Vec3 x y z)= 
+    let noiseVal = perlinNoise perlin (x, y, z)
+    in Vec3 noiseVal noiseVal noiseVal
 
 checkerTexture :: R -> Texture -> Texture -> Texture
 checkerTexture scale = CheckerTexture (1.0 / scale)
