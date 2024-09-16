@@ -1,5 +1,20 @@
 {-# LANGUAGE BangPatterns #-}
 
+{- |
+Module      :  Perlin
+Copyright   :  (c) Quinn Anhorn 2024
+License     :  BSD3 (see LICENSE)
+Maintainer  :  qda869@usask.ca
+Stability   :  experimental
+
+This module provides functionality for generating Perlin noise, a type of procedural 
+noise commonly used in computer graphics for textures, terrain, and smooth random 
+variations. The core features include generating random values and scrambling 3D 
+points using permutation vectors to produce repeatable noise patterns. 
+
+-}
+
+
 module Perlin where
 
 import           Data.Bits     (Bits (..))

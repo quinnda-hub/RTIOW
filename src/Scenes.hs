@@ -2,13 +2,13 @@ module Scenes where
 
 import           Data.Foldable (Foldable (foldl'))
 import           Hittable      (Material (..), SomeHittable (SomeHittable))
+import           Perlin        (makePerlin)
 import           Random        (arbitraryVec3, arbitraryVec3InRange,
                                 sampleFraction, sampleFractionInRange)
 import           Ray           (Ray (..))
 import           Sphere        (Sphere (..))
 import           System.Random (StdGen, mkStdGen)
-import           Texture       (Texture(..),
-                                checkerTextureFromColours)
+import           Texture       (Texture (..), checkerTextureFromColours)
 import           Vec3          (Vec3 (..), magnitude, (^*^), (^-^))
 
 staticBalls :: Int -> [SomeHittable]
@@ -141,3 +141,11 @@ checkeredSpheres = [sphere1, sphere2]
 earth :: Texture -> [SomeHittable]
 earth tex = [globe]
   where globe = SomeHittable $ StaticSphere (Vec3 0 0 0) 2 (Lambertian tex)
+
+perlinSpheres :: [SomeHittable]
+perlinSpheres =
+  let pertext = makePerlin 42
+      ground  = SomeHittable $ StaticSphere (Vec3 0 (-1000) 0) 1000 (Lambertian $ NoiseTexture pertext)
+      sphere  = SomeHittable $ StaticSphere (Vec3 0 2 0) 2 (Lambertian $ NoiseTexture pertext)
+  in [ground, sphere]
+
