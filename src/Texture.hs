@@ -45,8 +45,8 @@ textureValue (ImageTexture img) (u, v) _ =
         i  = floor (u' * fromIntegral (imageWidth img))
         j  = floor (v' * fromIntegral (imageHeight img))
     in pixelToRGB $ pixelAt img (clampCoord i (imageWidth img)) (clampCoord j (imageHeight img))
-textureValue (NoiseTexture perlin) _ (Vec3 x y z)= 
-    let noiseVal = perlinNoise perlin (x, y, z)
+textureValue (NoiseTexture perlin) _ p = 
+    let noiseVal = perlinNoise perlin p
     in Vec3 noiseVal noiseVal noiseVal
 
 checkerTexture :: R -> Texture -> Texture -> Texture
