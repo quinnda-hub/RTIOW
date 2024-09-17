@@ -15,7 +15,10 @@ points using permutation vectors to produce repeatable noise patterns.
 -}
 
 
-module Perlin where
+module Perlin (Perlin(..),
+               perlinNoise,
+               makePerlin
+               ) where
 
 import           Data.Bits     (Bits (..))
 import           Data.Vector   (Vector)

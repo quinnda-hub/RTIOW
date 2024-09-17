@@ -16,7 +16,29 @@ and `refract`, which provide additional vector operations commonly used in
 ray tracing and other applications.
 -}
 
-module Vec3 where
+module Vec3 (Vec3(..),
+             RGB,
+             iHat,
+             jHat,
+             kHat,
+             zeroV,
+             (^+^),
+             (^-^),
+             (^*^),
+             (><),
+             (<.>),
+             (^*),
+             (*^),
+             (^/),
+             sumV,
+             negateV,
+             magnitude,
+             normalize,
+             lengthSquared,
+             nearZero,
+             reflect,
+             refract
+             ) where
 
 import           Control.DeepSeq (NFData, rnf)
 import           Data.List       (intercalate)

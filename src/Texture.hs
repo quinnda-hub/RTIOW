@@ -15,7 +15,9 @@ functions for creating checkerboard textures from solid colors and for
 scaling textures.
 -}
 
-module Texture where
+module Texture (Texture(..),
+               textureValue,
+               checkerTextureFromColours) where
 
 import           Codec.Picture       (Image (..), Pixel (pixelAt))
 import qualified Codec.Picture.Types as JP

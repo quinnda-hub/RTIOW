@@ -14,7 +14,15 @@ are crucial for simulating realistic effects such as diffuse reflection and
 soft shadows.
 -}
 
-module Random where
+module Random (sampleFraction,
+               sampleFractionInRange,
+               sampleSquare,
+               arbitraryVec3,
+               arbitraryVec3InRange,
+               randomInUnitSphere,
+               randomUnitVector,
+               randomVec3Hemisphere,
+               randomInUnitDisk) where
 
 import           Math          (R)
 import           System.Random (Random (randomR), RandomGen, random)

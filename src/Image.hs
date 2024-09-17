@@ -17,7 +17,9 @@ Parallel processing is utilized in the rendering process to enhance
 performance.
 -}
 
-module Image where
+module Image (Image(..),
+              writeImage,
+              loadImageFromFile) where
 
 import           Codec.Picture               (convertRGB8, readImage)
 import qualified Codec.Picture.Types         as JP

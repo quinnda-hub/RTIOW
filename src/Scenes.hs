@@ -1,4 +1,9 @@
-module Scenes where
+module Scenes (staticBalls,
+               bouncingBalls,
+               bouncingBallsCheckered,
+               checkeredSpheres,
+               earth,
+               perlinSpheres) where
 
 import           Data.Foldable (Foldable (foldl'))
 import           Hittable      (Material (..), SomeHittable (SomeHittable))

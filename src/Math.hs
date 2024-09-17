@@ -12,7 +12,10 @@ for converting degrees to radians, and `linear2Gamma` for converting linear
 color values to gamma-corrected values.
 -}
 
-module Math where
+module Math (R, 
+             infinity,
+             degrees2Radians,
+             linear2Gamma) where
 
 type R = Double
 

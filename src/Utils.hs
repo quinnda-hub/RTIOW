@@ -13,7 +13,7 @@ current time and convert it into a format suitable for timing
 calculations.
 -}
 
-module Utils where
+module Utils (getSecondsNow) where
 
 import Data.Time.Clock (getCurrentTime, utctDayTime)
 

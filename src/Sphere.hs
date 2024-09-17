@@ -13,7 +13,7 @@ the normal at that point, and other relevant details. This is a fundamental
 component for ray tracing, enabling the rendering of spherical objects in a scene.
 -}
 
-module Sphere where
+module Sphere (Sphere(..)) where
 
 import           AABB     (makeAABB, enclosingAABB)
 import           Hittable (Hit (..), Hittable (..), Material (..))

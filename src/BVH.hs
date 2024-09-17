@@ -15,7 +15,9 @@ The BVH structure is a crucial optimization for rendering complex scenes in ray 
 reducing the number of intersection tests required.
 -}
 
-module BVH where
+module BVH (BVHNode(..),
+            buildBVH,
+            hit) where
 
 import           AABB                (AABB (..), boundingBoxMin, enclosingAABB,
                                       hitAABB, longestAxis)

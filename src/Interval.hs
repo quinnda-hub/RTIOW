@@ -14,7 +14,16 @@ provides commonly used intervals such as `universe` (spanning all real numbers)
 and `defaultInterval`.
 -}
 
-module Interval where
+module Interval (Interval(..),
+                 defaultInterval,
+                 interval,
+                 universe,
+                 size,
+                 contains, 
+                 surrounds,
+                 clamp,
+                 expand,
+                 enclosingInterval) where
 
 import           Math (R, infinity)
 

@@ -14,27 +14,17 @@ setting the normal direction relative to the ray. These functions are essential
 for ray tracing calculations.
 -}
 
-module Ray where
+module Ray (Ray(..),
+            rayAt,
+            setFaceNormal) where
 
 import           Math (R)
 import           Vec3 (Vec3 (..), negateV, (*^), (<.>), (^+^))
-
 
 data Ray = Ray { rayOrigin    :: !Vec3
                , rayDirection :: !Vec3
                , rayTime      :: !R
                } deriving (Show, Eq)
-
--- Initialize a ray given two vectors.
-initRay :: Vec3 -> Vec3 -> Ray
-initRay origin direction =
-    Ray origin direction 0
-
-getOrigin :: Ray -> Vec3
-getOrigin = rayOrigin
-
-getDirection :: Ray -> Vec3
-getDirection = rayDirection
 
 -- Computes the position along a ray at a given parameter t.
 rayAt :: Ray -> R -> Vec3

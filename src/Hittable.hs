@@ -17,7 +17,11 @@ functions like `hitList` for checking intersections across a collection of
 objects and implements the Schlick approximation for reflectivity.
 -}
 
-module Hittable where
+module Hittable (Hit(..),
+                 Hittable(..),
+                 SomeHittable(..),
+                 Scatterable(..),
+                 Material(..)) where
 
 import           AABB          (AABB)
 import           Interval      (Interval (..))
@@ -44,10 +48,6 @@ class Hittable a where
         -> Interval
         -> Maybe Hit
     boundingBox :: a -> AABB
-
-data World = World { getHittables :: [SomeHittable]
-                   , getWorldBox  :: AABB
-                   }
 
 data SomeHittable where
     SomeHittable :: Hittable a => a -> SomeHittable

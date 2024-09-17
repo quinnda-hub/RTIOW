@@ -15,7 +15,10 @@ rays as they interact with objects in the scene.
 -}
 {-# LANGUAGE BangPatterns #-}
 
-module Camera where
+module Camera (Camera(..),
+               createCamera,
+               getRay,
+               rayColour) where
 
 import           BVH           (BVHNode)
 import           Hittable      (Hit (..), Hittable (..), Scatterable (scatter))
