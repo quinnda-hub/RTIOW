@@ -60,6 +60,10 @@ perlinNoise perlin (Vec3 x y z) =
         u = x - fromIntegral xFloor
         v = y - fromIntegral yFloor
         w = z - fromIntegral zFloor
+        --Hermitian smoothing. 
+        u' = u*u*(3-2*u)
+        v' = v*v*(3-2*v)
+        w' = w*w*(3-2*w)
     -- Collect the corner values from the grid into a flat array
         c = V.generate 8 $ \idx ->
               let di = idx `shiftR` 2 .&. 1  -- Extract bit 2 (di)
@@ -68,7 +72,7 @@ perlinNoise perlin (Vec3 x y z) =
               in unsafeIndex (randFloats perlin) (unsafeIndex (permX perlin) ((i + di) .&. 255)
                              `xor` unsafeIndex (permY perlin) ((j + dj) .&. 255)
                              `xor` unsafeIndex (permZ perlin) ((k + dk) .&. 255))
-    in trilinearInterp c (u, v, w)
+    in trilinearInterp c (u', v', w')
 
 -- Trilinear interpolation of a 2x2x2 grid cube of values based on fractional coordinates (u, v, w).
 trilinearInterp :: Vector R -> (R, R, R) -> R
