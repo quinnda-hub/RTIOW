@@ -1,3 +1,5 @@
+{-# LANGUAGE Strict #-}
+
 {- | 
 Module      :  Math
 Copyright   :  (c) Quinn Anhorn 2024

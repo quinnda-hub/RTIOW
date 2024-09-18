@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE Strict #-}
 
 {- |
 Module      :  Image
@@ -42,13 +43,13 @@ import           Text.Printf                 (printf)
 import           Utils                       (getSecondsNow)
 import           Vec3                        (RGB, Vec3 (..), (^*), (^+^))
 
-data Image = Image { imageWidth   :: !Int
-                   , imageHeight  :: !Int
-                   , imageColours :: ![RGB]}
+data Image = Image { imageWidth   :: Int
+                   , imageHeight  :: Int
+                   , imageColours :: [RGB]}
 
 renderImage :: Camera -> BVHNode -> Int -> Image
 renderImage camera@(Camera { camImageWidth = width, camImageHeight = height, camSamplesPerPixel = samples }) bvh depth =
-    let coords  = [(a, b) | a <- [00..height-1], b <- [0..width-1]]
+    let coords   = [(a, b) | a <- [0..height-1], b <- [0..width-1]]
         colours = map computeColour coords `using` parListChunk 128 rdeepseq
     in Image width height colours
   where
@@ -59,14 +60,19 @@ renderImage camera@(Camera { camImageWidth = width, camImageHeight = height, cam
         (r2, _)  = sampleFraction g1
         baseU = (fromIntegral i + r1) / fromIntegral (width - 1)
         baseV = (fromIntegral j + r2) / fromIntegral (height - 1)
-        avgColour = accumulateColour g samples (Vec3 0 0 0) baseU baseV
+        avgColour = accumulateColour g samples baseU baseV
 
-    accumulateColour :: RandomGen g => g -> Int -> RGB -> R -> R -> RGB
-    accumulateColour _ 0 accColour _ _ = accColour ^* (1 / fromIntegral samples)
-    accumulateColour gen remainingSamples accColour baseU baseV =
-        let (ray, g') = getRay camera baseU baseV gen
-            colour    = rayColour g' depth bvh ray
-        in accumulateColour g' (remainingSamples - 1) (accColour ^+^ colour) baseU baseV
+    accumulateColour :: RandomGen g => g -> Int -> R -> R -> RGB
+    accumulateColour gen samples' baseU baseV =
+      go gen samples (Vec3 0 0 0)
+        where
+          go :: RandomGen g => g -> Int -> RGB -> RGB
+          go _ 0 accColour = accColour ^* (1 / fromIntegral samples')
+          go g remainingSamples accColour =
+            let (ray, g') = getRay camera baseU baseV g
+                colour   = rayColour g' depth bvh ray
+            in go g' (remainingSamples - 1) (accColour ^+^ colour)
+
 
 writeImage :: Camera -> BVHNode -> Int -> IO ()
 writeImage camera bvh raysPerSample = do

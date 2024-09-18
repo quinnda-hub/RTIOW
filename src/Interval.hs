@@ -1,3 +1,5 @@
+{-# LANGUAGE Strict #-}
+
 {- | 
 Module      :  Interval
 Copyright   :  (c) Quinn Anhorn 2024

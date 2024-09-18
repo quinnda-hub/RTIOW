@@ -1,3 +1,5 @@
+{-# LANGUAGE Strict #-}
+
 {- | 
 Module      :  Random
 Copyright   :  (c) Quinn Anhorn 2024

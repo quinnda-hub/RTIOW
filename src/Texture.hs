@@ -1,3 +1,5 @@
+{-# LANGUAGE Strict #-}
+
 {- |
 Module      :  Texture
 Copyright   :  (c) Quinn Anhorn 2024

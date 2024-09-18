@@ -1,4 +1,4 @@
-{-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE Strict #-}
 
 {- |
 Module      :  AABB
@@ -29,7 +29,7 @@ import           Math     (R)
 import           Ray      (Ray (..))
 import           Vec3     (Vec3 (..), zeroV)
 
-data AABB = AABB { xInterval, yInterval, zInterval :: !Interval }
+data AABB = AABB { xInterval, yInterval, zInterval :: Interval }
                  | AABBEmpty
                  deriving (Show, Eq)
 
@@ -46,16 +46,16 @@ makeAABB (Vec3 ax ay az) (Vec3 bx by bz) = AABB x y z
 hitAABB :: AABB -> Ray -> Interval -> Bool
 hitAABB AABBEmpty _ _ = False
 hitAABB (AABB x y z) (Ray origin direction _) rayT =
-    let !invDirX = 1.0 / xComp direction
-        !invDirY = 1.0 / yComp direction
-        !invDirZ = 1.0 / zComp direction
-        !tMin = iMin rayT
-        !tMax = iMax rayT
+    let invDirX = 1.0 / xComp direction
+        invDirY = 1.0 / yComp direction
+        invDirZ = 1.0 / zComp direction
+        tMin = iMin rayT
+        tMax = iMax rayT
         {-# INLINE checkAxis #-}
         checkAxis minVal maxVal originComp invDir =
-          let !t0 = (minVal - originComp) * invDir
-              !t1 = (maxVal - originComp) * invDir
-              !(tMin', tMax') = if t0 < t1 then (t0, t1) else (t1, t0)
+          let t0 = (minVal - originComp) * invDir
+              t1 = (maxVal - originComp) * invDir
+              (tMin', tMax') = if t0 < t1 then (t0, t1) else (t1, t0)
               tMinNew = max tMin tMin'
               tMaxNew = min tMax tMax'
           in tMaxNew > tMinNew

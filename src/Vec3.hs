@@ -1,3 +1,5 @@
+{-# LANGUAGE Strict #-}
+
 {- | 
 Module      :  Vec3
 Copyright   :  (c) Scott N. Walck 2012-2019, (c) Quinn Anhorn 2024

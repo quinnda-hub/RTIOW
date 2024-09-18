@@ -1,3 +1,5 @@
+{-# LANGUAGE Strict #-}
+
 {- | 
 Module      :  Ray
 Copyright   :  (c) Quinn Anhorn 2024

@@ -1,5 +1,5 @@
-{-# LANGUAGE GADTs              #-}
-{-# LANGUAGE ImpredicativeTypes #-}
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE Strict #-}
 
 {- |
 Module      :  Hittable

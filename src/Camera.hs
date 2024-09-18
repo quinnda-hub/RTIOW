@@ -13,7 +13,7 @@ scene. Functions like `createCamera` and `getRay` are provided to set
 up and use the camera, and `rayColour` is used to compute the color of
 rays as they interact with objects in the scene.
 -}
-{-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE Strict #-}
 
 module Camera (Camera(..),
                createCamera,
@@ -122,12 +122,12 @@ rayColour g maxDepth bvh r = loop g maxDepth r (Vec3 1 1 1)
         case hit bvh ray (interval 0.001 infinity) of
             Just hitRecord@(Hit _ _ _ _ m _) ->
                 case scatter m ray hitRecord gen of
-                    (Just (!scatteredRay, !attenuation), gen') ->
+                    (Just (scatteredRay, attenuation), gen') ->
                         let newAcc = acc ^*^ attenuation
                         in loop gen' (depth - 1) scatteredRay newAcc
                     (Nothing, _) -> zeroV
             Nothing ->
-                let !unitDirection = normalize (rayDirection ray)
-                    !t = 0.5 * (yComp unitDirection + 1.0)
+                let unitDirection = normalize (rayDirection ray)
+                    t = 0.5 * (yComp unitDirection + 1.0)
                     background = (1.0 - t) *^ Vec3 1 1 1 ^+^ t *^ Vec3 0.5 0.7 1.0
                 in acc ^*^ background
