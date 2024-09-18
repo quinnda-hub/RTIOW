@@ -1,4 +1,4 @@
-{-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE Strict #-}
 
 {- |
 Module      :  Perlin
@@ -21,8 +21,8 @@ module Perlin (Perlin(..),
                ) where
 
 import           Data.Bits     (Bits (..))
-import           Data.Vector   (Vector)
-import qualified Data.Vector   as V
+import           Data.Vector.Unboxed   (Vector)
+import qualified Data.Vector.Unboxed   as V
 import           Math          (R)
 import           System.Random (Random (..), RandomGen, mkStdGen)
 import           Vec3          (Vec3 (..))
@@ -51,15 +51,15 @@ makePerlin seed =
 perlinNoise :: Perlin -> Vec3 -> R
 perlinNoise perlin (Vec3 x y z) =
     -- Precompute the integer and fractional parts of the coordinates
-    let !xFloor = floor x
-        !yFloor = floor y
-        !zFloor = floor z
-        !i = xFloor .&. 255
-        !j = yFloor .&. 255
-        !k = zFloor .&. 255
-        !u = x - fromIntegral xFloor
-        !v = y - fromIntegral yFloor
-        !w = z - fromIntegral zFloor
+    let xFloor = floor x
+        yFloor = floor y
+        zFloor = floor z
+        i = xFloor .&. 255
+        j = yFloor .&. 255
+        k = zFloor .&. 255
+        u = x - fromIntegral xFloor
+        v = y - fromIntegral yFloor
+        w = z - fromIntegral zFloor
     -- Collect the corner values from the grid into a flat array
         c = V.generate 8 $ \idx ->
               let di = idx `shiftR` 2 .&. 1  -- Extract bit 2 (di)
@@ -73,9 +73,9 @@ perlinNoise perlin (Vec3 x y z) =
 -- Trilinear interpolation of a 2x2x2 grid cube of values based on fractional coordinates (u, v, w).
 trilinearInterp :: Vector R -> (R, R, R) -> R
 trilinearInterp c (u, v, w) =
-    let accum = sum [ let !i' = fromIntegral (idx `shiftR` 2 .&. 1)
-                          !j' = fromIntegral (idx `shiftR` 1 .&. 1)
-                          !k' = fromIntegral (idx .&. 1)
+    let accum = sum [ let i' = fromIntegral (idx `shiftR` 2 .&. 1)
+                          j' = fromIntegral (idx `shiftR` 1 .&. 1)
+                          k' = fromIntegral (idx .&. 1)
                       in (i' * u + (1 - i') * (1 - u))
                        * (j' * v + (1 - j') * (1 - v))
                        * (k' * w + (1 - k') * (1 - w))
