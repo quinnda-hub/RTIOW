@@ -21,7 +21,7 @@ module Perlin (Perlin(..),
                ) where
 
 import           Data.Bits     (Bits (..))
-import           Data.Vector.Unboxed   (Vector)
+import           Data.Vector.Unboxed   (Vector, unsafeIndex)
 import qualified Data.Vector.Unboxed   as V
 import           Math          (R)
 import           System.Random (Random (..), RandomGen, mkStdGen)
@@ -65,9 +65,9 @@ perlinNoise perlin (Vec3 x y z) =
               let di = idx `shiftR` 2 .&. 1  -- Extract bit 2 (di)
                   dj = idx `shiftR` 1 .&. 1  -- Extract bit 1 (dj)
                   dk = idx .&. 1               -- Extract bit 0 (dk)
-              in randFloats perlin V.! ((permX perlin V.! ((i + di) .&. 255))
-                             `xor` (permY perlin V.! ((j + dj) .&. 255))
-                             `xor` (permZ perlin V.! ((k + dk) .&. 255)))
+              in unsafeIndex (randFloats perlin) (unsafeIndex (permX perlin) ((i + di) .&. 255)
+                             `xor` unsafeIndex (permY perlin) ((j + dj) .&. 255)
+                             `xor` unsafeIndex (permZ perlin) ((k + dk) .&. 255))
     in trilinearInterp c (u, v, w)
 
 -- Trilinear interpolation of a 2x2x2 grid cube of values based on fractional coordinates (u, v, w).
@@ -79,7 +79,7 @@ trilinearInterp c (u, v, w) =
                       in (i' * u + (1 - i') * (1 - u))
                        * (j' * v + (1 - j') * (1 - v))
                        * (k' * w + (1 - k') * (1 - w))
-                       * (c V.! idx)
+                       * unsafeIndex c idx
                   | idx <- [0..7]]
     in accum
 
