@@ -1,3 +1,5 @@
+{-# LANGUAGE BangPatterns #-}
+
 {- |
 Module      :  BVH
 Copyright   :  (c) Quinn Anhorn 2024
@@ -45,19 +47,19 @@ buildBVH objects =
     in BVHBranch left right final
 
 instance Hittable BVHNode where
-    hit (BVHLeaf (SomeHittable obj) bbox) ray tRange
+    hit (BVHLeaf (SomeHittable obj) !bbox) ray tRange
         | hitAABB bbox ray tRange = hit obj ray tRange
         | otherwise               = Nothing
-    hit (BVHBranch left right bbox) ray tRange
+    hit (BVHBranch !left !right !bbox) !ray !tRange
         | not (hitAABB bbox ray tRange) = Nothing
         | otherwise =
             case hit left ray tRange of
                 Just leftHit ->
-                    let newTMax  = hitT leftHit
+                    let !newTMax  = hitT leftHit
                         rightHit = hit right ray (interval (iMin tRange) newTMax)
                     in rightHit <|> Just leftHit
                 Nothing ->
                     hit right ray tRange
 
-    boundingBox (BVHLeaf _ bbox)     = bbox
-    boundingBox (BVHBranch _ _ bbox) = bbox
+    boundingBox (BVHLeaf _ !bbox)     = bbox
+    boundingBox (BVHBranch _ _ !bbox) = bbox

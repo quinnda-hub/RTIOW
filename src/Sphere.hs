@@ -1,3 +1,5 @@
+{-# LANGUAGE BangPatterns #-}
+
 {- |
 Module      :  Sphere
 Copyright   :  (c) Quinn Anhorn 2024
@@ -33,51 +35,53 @@ data Sphere = StaticSphere { sphereCenter   :: !Vec3
 
 instance Hittable Sphere where
     {-# INLINE hit #-}
-    hit sphere ray tRange =
-        let radius = max 0 (sphereRadius sphere)
-            center  = sphereCenterAt sphere (rayTime ray)
-            oc      = center ^-^ rayOrigin ray
-            a       = rayDirection ray <.> rayDirection ray
-            h       = rayDirection ray <.> oc
-            c       = (oc <.> oc) - radius*radius
-            discriminant = h*h - a*c
+    hit !sphere !ray !tRange =
+        let !radius = max 0 (sphereRadius sphere)
+            !center  = sphereCenterAt sphere (rayTime ray)
+            !oc      = center ^-^ rayOrigin ray
+            !a       = rayDirection ray <.> rayDirection ray
+            !h       = rayDirection ray <.> oc
+            !c       = (oc <.> oc) - radius*radius
+            !discriminant = h*h - a*c
         in if discriminant < 0
             then Nothing
-            else let sqrtd = sqrt discriminant
+            else let !sqrtd = sqrt discriminant
                      -- Find the nearest root that lies in
                      -- the acceptable range.
-                     root1 = (h - sqrtd) / a
-                     root2 = (h + sqrtd) / a
-                     root = if contains tRange root1
+                     !root1 = (h - sqrtd) / a
+                     !root2 = (h + sqrtd) / a
+                     !root = if contains tRange root1
                             then root1
                             else root2
                  in if not (contains tRange root)
                     then Nothing
-                    else let p               = rayAt ray root
-                             outwardNormal   = (p ^-^ center) ^/ radius
-                             (normal, front) = setFaceNormal ray outwardNormal
-                             texCoords       = sphereUV outwardNormal
+                    else let !p               = rayAt ray root
+                             !outwardNormal   = (p ^-^ center) ^/ radius
+                             !(normal, front) = setFaceNormal ray outwardNormal
+                             !texCoords       = sphereUV outwardNormal
                          in Just (Hit p normal root front (sphereMaterial sphere) texCoords)
 
-    boundingBox (StaticSphere center radius _) = createStaticSphereBBox center radius
+    boundingBox (StaticSphere !center !radius _) = createStaticSphereBBox center radius
       where
-        createStaticSphereBBox c r =
-            let radiusVec = Vec3 r r r
+        createStaticSphereBBox !c !r =
+            let !radiusVec = Vec3 r r r
             in makeAABB (c^-^radiusVec) (c^+^radiusVec)
-    boundingBox sphere@(MovingSphere _ radius _) = 
-        let radiusVec = Vec3 radius radius radius
-            center1 = sphereCenterAt sphere 0 
-            center2 = sphereCenterAt sphere 1 
-            box1 = makeAABB (center1^-^radiusVec) (center1^+^radiusVec)
-            box2 = makeAABB (center2^-^radiusVec) (center2^+^radiusVec)
+    boundingBox sphere@(MovingSphere _ !radius _) = 
+        let !radiusVec = Vec3 radius radius radius
+            !center1 = sphereCenterAt sphere 0 
+            !center2 = sphereCenterAt sphere 1 
+            !box1 = makeAABB (center1^-^radiusVec) (center1^+^radiusVec)
+            !box2 = makeAABB (center2^-^radiusVec) (center2^+^radiusVec)
         in enclosingAABB box1 box2
 
 {-# INLINEABLE sphereCenterAt #-}
 -- Calculate the center of a moving sphere at a given time.
 sphereCenterAt :: Sphere -> R -> Vec3
-sphereCenterAt (StaticSphere center _ _) _ = center
-sphereCenterAt (MovingSphere centerRay _ _) time =
-    rayOrigin centerRay ^+^ (rayDirection centerRay ^* time)
+sphereCenterAt (StaticSphere !center _ _) _ = center
+sphereCenterAt (MovingSphere !centerRay _ _) !time =
+    let !origin    = rayOrigin centerRay
+        !direction = rayDirection centerRay ^* time
+    in origin ^+^ direction
 
 {-#  INLINEABLE sphereUV #-}
 sphereUV :: Vec3 -> (R, R) 

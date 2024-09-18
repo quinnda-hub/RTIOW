@@ -116,6 +116,7 @@ rayColour :: RandomGen g
           -> RGB
 rayColour g maxDepth bvh r = loop g maxDepth r (Vec3 1 1 1)
   where
+    {-# INLINE loop #-}
     loop _ 0 _ acc = acc
     loop gen depth ray acc =
         case hit bvh ray (interval 0.001 infinity) of

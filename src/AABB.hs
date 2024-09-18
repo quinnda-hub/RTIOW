@@ -46,11 +46,11 @@ makeAABB (Vec3 ax ay az) (Vec3 bx by bz) = AABB x y z
 hitAABB :: AABB -> Ray -> Interval -> Bool
 hitAABB AABBEmpty _ _ = False
 hitAABB (AABB x y z) (Ray origin direction _) rayT =
-    let invDirX = 1.0 / xComp direction
-        invDirY = 1.0 / yComp direction
-        invDirZ = 1.0 / zComp direction
-        tMin = iMin rayT
-        tMax = iMax rayT
+    let !invDirX = 1.0 / xComp direction
+        !invDirY = 1.0 / yComp direction
+        !invDirZ = 1.0 / zComp direction
+        !tMin = iMin rayT
+        !tMax = iMax rayT
         {-# INLINE checkAxis #-}
         checkAxis minVal maxVal originComp invDir =
           let !t0 = (minVal - originComp) * invDir
@@ -63,7 +63,6 @@ hitAABB (AABB x y z) (Ray origin direction _) rayT =
     in checkAxis (iMin x) (iMax x) (xComp origin) invDirX &&
        checkAxis (iMin y) (iMax y) (yComp origin) invDirY &&
        checkAxis (iMin z) (iMax z) (zComp origin) invDirZ
-
 
 -- Constructs an AABB from two existing AABBs.
 enclosingAABB :: AABB -> AABB -> AABB

@@ -98,6 +98,10 @@ library
     -- Base language which the package is written in.
     default-language: Haskell2010
 
+    ghc-options: -O2
+                 -funbox-small-strict-fields
+                 -fllvm
+
 executable RTIOW
     -- Import common warning flags.
     import:           warnings
@@ -125,8 +129,8 @@ executable RTIOW
     default-language: Haskell2010
 
     ghc-options: -O2
-                 -funbox-strict-fields
                  -threaded
+                 -fllvm
 
 test-suite RTIOW-test
     -- Import common warning flags.
