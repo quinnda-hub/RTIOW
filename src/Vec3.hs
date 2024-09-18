@@ -1,4 +1,8 @@
 {-# LANGUAGE Strict #-}
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE FlexibleInstances #-}
 
 {- | 
 Module      :  Vec3
@@ -45,15 +49,7 @@ module Vec3 (Vec3(..),
 import           Control.DeepSeq (NFData, rnf)
 import           Data.List       (intercalate)
 import           Math            (R)
-
-infixl 7 ><
-infixl 6 ^+^
-infixl 6 ^-^
-infixl 6 ^*^
-infixl 7 *^
-infixl 7 ^*
-infixl 7 ^/
-infixl 7 <.>
+import Data.Vector.Unboxed.Deriving (derivingUnbox)
 
 data Vec3 = Vec3 { xComp :: R
                  , yComp :: R
@@ -67,6 +63,20 @@ instance Show Vec3 where
 
 instance NFData Vec3 where
     rnf (Vec3 ax ay az) = rnf ax `seq` rnf ay `seq` rnf az
+
+derivingUnbox "Vec3"
+  [t| Vec3 -> (Double, Double, Double) |]
+  [| \(Vec3 x y z) -> (x, y, z)|]
+  [|\(x, y, z) -> Vec3 x y z|]  
+
+infixl 7 ><
+infixl 6 ^+^
+infixl 6 ^-^
+infixl 6 ^*^
+infixl 7 *^
+infixl 7 ^*
+infixl 7 ^/
+infixl 7 <.>  
 
 -- Unit vectors.
 iHat :: Vec3

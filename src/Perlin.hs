@@ -14,7 +14,6 @@ points using permutation vectors to produce repeatable noise patterns.
 
 -}
 
-
 module Perlin (Perlin(..),
                perlinNoise,
                makePerlin
@@ -27,11 +26,12 @@ import           Math          (R)
 import           System.Random (Random (..), RandomGen, mkStdGen)
 import           Vec3          (Vec3 (..))
 
+
 data Perlin = Perlin { randFloats :: Vector R
                      , permX      :: Vector Int
                      , permY      :: Vector Int
                      , permZ      :: Vector Int
-                     }
+                     }                   
 
 pointCount :: Int
 pointCount = 256

@@ -150,7 +150,7 @@ earth tex = [globe]
 perlinSpheres :: [SomeHittable]
 perlinSpheres =
   let pertext = makePerlin 42
-      ground  = SomeHittable $ StaticSphere (Vec3 0 (-1000) 0) 1000 (Lambertian $ NoiseTexture pertext)
-      sphere  = SomeHittable $ StaticSphere (Vec3 0 2 0) 2 (Lambertian $ NoiseTexture pertext)
+      ground  = SomeHittable $ StaticSphere (Vec3 0 (-1000) 0) 1000 (Lambertian $ NoiseTexture pertext 4)
+      sphere  = SomeHittable $ StaticSphere (Vec3 0 2 0) 2 (Lambertian $ NoiseTexture pertext 4)
   in [ground, sphere]
 
