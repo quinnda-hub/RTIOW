@@ -21,6 +21,7 @@ module Random (sampleFraction,
                sampleSquare,
                arbitraryVec3,
                arbitraryVec3InRange,
+               generateRandomVecs,
                randomInUnitSphere,
                randomUnitVector,
                randomVec3Hemisphere,
@@ -36,7 +37,7 @@ sampleFraction :: RandomGen g  => g -> (R, g)
 sampleFraction = randomR (0, 1)
 
 sampleFractionInRange :: RandomGen g => g -> R -> R -> (R, g)
-sampleFractionInRange gen a b = randomR (min a b, max a b) gen 
+sampleFractionInRange gen a b = randomR (min a b, max a b) gen
 
 {-# INLINEABLE sampleSquare #-}
 sampleSquare :: RandomGen g => g -> ((R, R), g)
@@ -61,11 +62,21 @@ arbitraryVec3InRange minVal maxVal gen =
         (z, gen''') = randomR (minVal, maxVal) gen''
     in (Vec3 x y z, gen''')
 
+{-# INLINABLE generateRandomVecs #-}
+generateRandomVecs :: RandomGen g => Int -> (R, R) -> g -> ([Vec3], g)
+generateRandomVecs 0 _ gen = ([], gen)
+generateRandomVecs n range gen =
+    let (vec, gen') = uncurry arbitraryVec3InRange range gen
+        (vecs, gen'') = generateRandomVecs (n - 1) range gen'
+    in (vec : vecs, gen'')
+
 {-# INLINEABLE randomInUnitSphere #-}
 randomInUnitSphere :: RandomGen g => g -> (Vec3, g)
 randomInUnitSphere gen =
-    let (p, gen') = arbitraryVec3InRange (-1) 1 gen
-    in if lengthSquared p < 1 then (p, gen') else randomInUnitSphere gen'
+    let findPoint g' =
+            let (p, g'') = arbitraryVec3InRange (-1) 1 g'
+            in if lengthSquared p < 1 then (p, g'') else findPoint g''
+    in findPoint gen
 
 {-# INLINEABLE randomUnitVector #-}
 randomUnitVector :: RandomGen g => g -> (Vec3, g)

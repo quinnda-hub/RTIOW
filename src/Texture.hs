@@ -31,7 +31,7 @@ import Perlin (Perlin, perlinNoise)
 data Texture = SolidColour RGB
              | CheckerTexture R Texture Texture
              | ImageTexture (JP.Image JP.PixelRGB8)
-             | NoiseTexture Perlin R 
+             | NoiseTexture Perlin R
 
 textureValue :: Texture -> (R, R) -> Vec3 -> RGB
 textureValue (SolidColour colour) _ _ = colour
@@ -49,9 +49,8 @@ textureValue (ImageTexture img) (u, v) _ =
         i  = floor (u' * fromIntegral (imageWidth img))
         j  = floor (v' * fromIntegral (imageHeight img))
     in pixelToRGB $ pixelAt img (clampCoord i (imageWidth img)) (clampCoord j (imageHeight img))
-textureValue (NoiseTexture perlin scale) _ p = 
-    let noiseVal = perlinNoise perlin (p ^* scale)
-    in Vec3 noiseVal noiseVal noiseVal
+textureValue (NoiseTexture perlin scale) _ p =
+     Vec3 1 1 1 ^* (0.5 * (1 + perlinNoise perlin (p ^* scale)))
 
 checkerTexture :: R -> Texture -> Texture -> Texture
 checkerTexture scale = CheckerTexture (1.0 / scale)
