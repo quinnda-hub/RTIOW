@@ -15,8 +15,8 @@ points using permutation vectors to produce repeatable noise patterns.
 -}
 
 module Perlin (Perlin(..),
-               perlinNoise,
-               makePerlin
+               makePerlin,
+               turb
                ) where
 
 import           Data.Bits           (Bits (..))
@@ -25,7 +25,7 @@ import qualified Data.Vector.Unboxed as V
 import           Math                (R)
 import           Random              (generateRandomVecs)
 import           System.Random       (Random (..), RandomGen, mkStdGen)
-import           Vec3                (Vec3 (..), (<.>))
+import           Vec3                (Vec3 (..), (<.>), (^*))
 
 
 data Perlin = Perlin { randVecs :: Vector Vec3
@@ -51,12 +51,12 @@ makePerlin seed =
 -- The noise is generated using a hash of a 3D point (x, y, z) and random permutations.
 perlinNoise :: Perlin -> Vec3 -> R
 perlinNoise perlin (Vec3 x y z) =
-    let u = x - fromIntegral (floor x :: Int) 
+    let u = x - fromIntegral (floor x :: Int)
         v = y - fromIntegral (floor y :: Int )
         w = z - fromIntegral (floor z :: Int)
 
-        i = floor x .&. 255 
-        j = floor y .&. 255 
+        i = floor x .&. 255
+        j = floor y .&. 255
         k = floor z .&. 255
 
     -- Collect the corner unit vectors for interpolation.
@@ -69,6 +69,17 @@ perlinNoise perlin (Vec3 x y z) =
                              `xor` (permZ perlin `unsafeIndex` ((k + dk) .&. 255)))
 
     in trilinearInterp c (u, v, w)
+
+-- Multiple summed frequencies.
+turb :: Perlin -> Vec3 -> Int -> R
+turb perlin p depth =
+    let loop 0 _ _ accum = abs accum
+        loop n tempP weight accum =
+            let newAccum = accum + weight * perlinNoise perlin tempP
+                newTempP = tempP ^* 2    -- Scale the point for higher frequencies
+                newWeight = weight * 0.5 -- Reduce the contribution of each successive octave
+            in loop (n - 1) newTempP newWeight newAccum
+    in loop depth p 1.0 0.0
 
 -- Trilinear interpolation of a 2x2x2 grid cube of values based on fractional coordinates (u, v, w).
 trilinearInterp :: Vector Vec3 -> (R, R, R) -> R
