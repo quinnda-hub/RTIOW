@@ -67,6 +67,7 @@ library
                       Interval,
                       Math,
                       Perlin,
+                      Quad,
                       Random,
                       Ray,
                       Scenes,

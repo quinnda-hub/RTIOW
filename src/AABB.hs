@@ -24,7 +24,7 @@ module AABB (AABB(..),
              longestAxis,
              enclosingAABB) where
 
-import           Interval (Interval (..), enclosingInterval)
+import           Interval (Interval (..), enclosingInterval, expand, size)
 import           Math     (R)
 import           Ray      (Ray (..))
 import           Vec3     (Vec3 (..), zeroV)
@@ -35,7 +35,8 @@ data AABB = AABB { xInterval, yInterval, zInterval :: Interval }
 
 -- Constructs an AABB from two points by treating them as the extrema of the bounding box.
 makeAABB :: Vec3 -> Vec3 -> AABB
-makeAABB (Vec3 ax ay az) (Vec3 bx by bz) = AABB x y z
+makeAABB (Vec3 ax ay az) (Vec3 bx by bz) = padToMinimum $
+  AABB x y z
   where
     x = if ax <= bx then Interval ax bx else Interval bx ax
     y = if ay <= by then Interval ay by else Interval by ay
@@ -80,6 +81,17 @@ boundingBoxMin AABBEmpty    = zeroV
 boundingBoxMax :: AABB -> Vec3
 boundingBoxMax (AABB x y z) = Vec3 (iMax x) (iMax y) (iMax z)
 boundingBoxMax AABBEmpty    = zeroV
+
+-- Ensure that no side of the AABB is smaller than some delta, padding if necessary.
+padToMinimum :: AABB -> AABB
+padToMinimum (AABB ix iy iz) =
+  let
+    delta = 0.0001
+  in
+    AABB (if size ix < delta then expand ix delta else ix)
+         (if size iy < delta then expand iy delta else iy)
+         (if size iz < delta then expand iz delta else iz)
+padToMinimum AABBEmpty = AABBEmpty
 
 -- Find the longest axis of an AABB.
 longestAxis :: AABB -> (Vec3 -> R)

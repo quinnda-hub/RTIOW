@@ -34,7 +34,7 @@ data Sphere = StaticSphere { sphereCenter   :: Vec3
                            , sphereMaterial  :: Material }
 
 instance Hittable Sphere where
-    {-# INLINE hit #-}
+    {-# INLINEABLE hit #-}
     hit sphere ray tRange =
         let radius = max 0 (sphereRadius sphere)
             center  = sphereCenterAt sphere (rayTime ray)
