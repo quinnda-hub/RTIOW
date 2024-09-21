@@ -3,11 +3,13 @@ module Scenes (staticBalls,
                bouncingBallsCheckered,
                checkeredSpheres,
                earth,
-               perlinSpheres) where
+               perlinSpheres,
+               quads) where
 
 import           Data.Foldable (Foldable (foldl'))
 import           Hittable      (Material (..), SomeHittable (SomeHittable))
 import           Perlin        (makePerlin)
+import           Quad          (makeQuad)
 import           Random        (arbitraryVec3, arbitraryVec3InRange,
                                 sampleFraction, sampleFractionInRange)
 import           Ray           (Ray (..))
@@ -154,3 +156,19 @@ perlinSpheres =
       sphere  = SomeHittable $ StaticSphere (Vec3 0 2 0) 2 (Lambertian $ NoiseTexture pertext 4)
   in [ground, sphere]
 
+quads :: [SomeHittable]
+quads = [left, back, right, upper, lower]
+  where
+    -- Materials.
+    leftRed   = Lambertian $ SolidColour $ Vec3 1.0 0.2 0.2
+    backGreen = Lambertian $ SolidColour $ Vec3 0.2 1.0 0.2
+    rightBlue = Lambertian $ SolidColour $ Vec3 0.2 0.2 1.0
+    uprOrange = Lambertian $ SolidColour $ Vec3 1.0 0.5 0.0
+    lwrTeal   = Lambertian $ SolidColour $ Vec3 0.2 0.8 0.8
+
+    -- Quads.
+    left  = SomeHittable $ makeQuad (Vec3 (-3.0) (-2.0) 5.0) (Vec3 0.0 0.0 (-4.0)) (Vec3 0.0 4.0 0.0) leftRed
+    back  = SomeHittable $ makeQuad (Vec3 (-2.0) (-2.0) 0.0) (Vec3 4.0 0.0 0.0) (Vec3 0.0 4.0 0.0) backGreen
+    right = SomeHittable $ makeQuad (Vec3 3.0 (-2.0) 1.0) (Vec3 0.0 0.0 4.0) (Vec3 0.0 4.0 0.0) rightBlue
+    upper = SomeHittable $ makeQuad (Vec3 (-2.0) 3.0 1.0) (Vec3 4.0 0.0 0.0) (Vec3 0.0 0.0 4.0) uprOrange
+    lower = SomeHittable $ makeQuad (Vec3 (-2.0) (-3.0) 5.0) (Vec3 4.0 0.0 0.0) (Vec3 0.0 0.0 (-4.0)) lwrTeal

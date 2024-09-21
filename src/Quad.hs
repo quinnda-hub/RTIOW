@@ -9,28 +9,37 @@ Maintainer  :  qda869@usask.ca
 Stability   :  experimental
 
 This module defines the `Quad` data type and its instance of the `Hittable` class.
-The `Quad` type represents a quadrilateral in 3D space, defined by a point, two 
-spanning vectors, and a normal. The `hit` function provides the logic for detecting 
-intersections between a ray and the quad, determining if the intersection point lies 
+The `Quad` type represents a quadrilateral in 3D space, defined by a point, two
+spanning vectors, and a normal. The `hit` function provides the logic for detecting
+intersections between a ray and the quad, determining if the intersection point lies
 within the bounds of the quad.
 -}
 
-module Quad where
+module Quad (Quad(..), makeQuad) where
 
 import           AABB     (enclosingAABB, makeAABB)
 import           Hittable (Hit (..), Hittable (..), Material)
 import           Interval (Interval (..), contains)
 import           Math     (R)
 import           Ray      (Ray (..), rayAt, setFaceNormal)
-import           Vec3     (Vec3 (..), (<.>), (><), (^+^), (^-^))
+import           Vec3     (Vec3 (..), normalize, (<.>), (><), (^+^), (^-^), (^/))
 
-data Quad = Quad { qPoint    :: Vec3 -- The origin point of the quad (Q). 
-                 , qU        :: Vec3 -- Spanning vector U of the quad. 
-                 , qV        :: Vec3 -- Spanning vector V of the quad. 
+data Quad = Quad { qPoint    :: Vec3 -- The origin point of the quad (Q).
+                 , qU        :: Vec3 -- Spanning vector U of the quad.
+                 , qV        :: Vec3 -- Spanning vector V of the quad.
+                 , qW        :: Vec3 -- Used to compute the alpha and beta values.
                  , qNormal   :: Vec3 -- Normal vector of the quad.
                  , qD        :: R    -- D value in the plane equation.
                  , qMaterial :: Material -- Material of the quad.
                  }
+
+makeQuad :: Vec3 -> Vec3 -> Vec3 -> Material -> Quad
+makeQuad origin u v = Quad origin u v w normal d
+  where
+    n      = u >< v 
+    normal = normalize n
+    w      = n ^/ (n <.> n)
+    d      = normal <.> origin
 
 instance Hittable Quad where
     {-# INLINABLE hit #-}
@@ -47,8 +56,8 @@ instance Hittable Quad where
       where denom  = qNormal <.> rayDirection ray
             t      = (qD - qNormal <.> rayOrigin ray) / denom
             hitVec = intersection ^-^ qPoint
-            alpha  = (hitVec >< qV) <.> qNormal
-            beta   = (hitVec >< qU) <.> qNormal
+            alpha  = qW <.> (hitVec >< qV) 
+            beta   = qW <.> (qU >< hitVec)
             (normal, front) = setFaceNormal ray qNormal
             intersection    = rayAt ray t
     boundingBox Quad{..} = enclosingAABB bboxDiagonal1 bboxDiagonal2

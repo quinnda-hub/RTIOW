@@ -45,7 +45,8 @@ import           Vec3                        (RGB, Vec3 (..), (^*), (^+^))
 
 data Image = Image { imageWidth   :: Int
                    , imageHeight  :: Int
-                   , imageColours :: [RGB]}
+                   , imageColours :: [RGB]
+                   } 
 
 renderImage :: Camera -> BVHNode -> Int -> Image
 renderImage camera@(Camera { camImageWidth = width, camImageHeight = height, camSamplesPerPixel = samples }) bvh depth =

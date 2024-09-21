@@ -4,19 +4,19 @@ import           BVH     (buildBVH)
 import           Camera  (Camera (..), createCamera)
 import           Image   (writeImage)
 import           Math    (R)
-import           Scenes  (perlinSpheres)
+import           Scenes  (quads)
 import           Vec3    (Vec3 (..))
 
 aspectRatio :: R
-aspectRatio = 16 / 9
+aspectRatio = 1.0
 
 imageWidth :: Int
-imageWidth = 1200
+imageWidth = 400
 
 camera :: Camera
-camera = createCamera aspectRatio imageWidth 100 20 (Vec3 13 2 3) (Vec3 0 0 0) (Vec3 0 1 0) 0.6 10
+camera = createCamera aspectRatio imageWidth 100 80 (Vec3 0 0 9) (Vec3 0 0 0) (Vec3 0 1 0) 0.0 1
 
 main :: IO ()
 main = do 
-    let scene = perlinSpheres
+    let scene = quads
     writeImage camera (buildBVH scene) 10
