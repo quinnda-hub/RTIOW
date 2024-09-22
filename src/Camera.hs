@@ -21,13 +21,14 @@ module Camera (Camera(..),
                rayColour) where
 
 import           BVH           (BVHNode)
-import           Hittable      (Hit (..), Hittable (..), Scatterable (scatter))
+import           Hittable      (Hit (..), Hittable (..), Scatterable (scatter),
+                                emitted)
 import           Interval      (interval)
 import           Math          (R, degrees2Radians, infinity)
 import           Random        (randomInUnitDisk, sampleFraction)
 import           Ray           (Ray (..))
 import           System.Random (RandomGen)
-import           Vec3          (RGB, Vec3 (..), negateV, normalize, zeroV, (*^),
+import           Vec3          (RGB, Vec3 (..), negateV, normalize, (*^),
                                 (><), (^*), (^*^), (^+^), (^-^))
 
 data Camera = Camera { camLowerLeftCorner :: Vec3
@@ -44,6 +45,7 @@ data Camera = Camera { camLowerLeftCorner :: Vec3
                      , camLensRadius      :: R
                      , camU, camV, camW   :: Vec3
                      , camFocusDist       :: R
+                     , camBackgroundCol   :: RGB
                      } deriving (Show)
 
 createCamera :: R        -- Aspect ratio
@@ -55,8 +57,9 @@ createCamera :: R        -- Aspect ratio
              -> Vec3     -- Up vector (usually Vec3 0 1 0)
              -> R        -- Aperture (determines the amount of defocus blur)
              -> R        -- Focus distance (distance to the plane in perfect focus)
+             -> RGB      -- Background colour. 
              -> Camera
-createCamera aspectRatio imageWidth samples fov lookFrom lookAt up defocusDist focusDist =
+createCamera aspectRatio imageWidth samples fov lookFrom lookAt up defocusDist focusDist background =
     let theta           = degrees2Radians $ fromIntegral fov
         h               = tan (theta / 2)
         viewportHeight  = 2.0 * h * focusDist
@@ -73,7 +76,7 @@ createCamera aspectRatio imageWidth samples fov lookFrom lookAt up defocusDist f
 
         lensRadius      = focusDist * tan (degrees2Radians (defocusDist / 2.0))
         imageHeight     = round $ fromIntegral imageWidth / aspectRatio
-    in Camera lowerLeftCorner horizontal vertical origin imageWidth imageHeight samples fov lookFrom lookAt up lensRadius u v w focusDist
+    in Camera lowerLeftCorner horizontal vertical origin imageWidth imageHeight samples fov lookFrom lookAt up lensRadius u v w focusDist background
 
 getRay :: RandomGen g
        => Camera
@@ -107,27 +110,25 @@ getRay camera baseU baseV gen =
     -- Create the ray
     ray = Ray orig direction time
 
-{-# INLINE rayColour #-}
+{-# INLINEABLE rayColour #-}
 rayColour :: RandomGen g
           => g
           -> Int -- Max recursion depth.
           -> BVHNode
           -> Ray
+          -> RGB -- Background colour.
           -> RGB
-rayColour g maxDepth bvh r = loop g maxDepth r (Vec3 1 1 1)
+rayColour g maxDepth bvh r background = loop g maxDepth r (Vec3 1 1 1)
   where
-    {-# INLINE loop #-}
     loop _ 0 _ acc = acc
     loop gen depth ray acc =
         case hit bvh ray (interval 0.001 infinity) of
-            Just hitRecord@(Hit _ _ _ _ m _) ->
-                case scatter m ray hitRecord gen of
+            Just hitRecord@(Hit p _ _ _ m (u, v)) ->
+                let emittedLight = emitted m u v p
+                in case scatter m ray hitRecord gen of
                     (Just (scatteredRay, attenuation), gen') ->
-                        let newAcc = acc ^*^ attenuation
+                        let newAcc = (acc ^*^ attenuation) ^+^ emittedLight
                         in loop gen' (depth - 1) scatteredRay newAcc
-                    (Nothing, _) -> zeroV
+                    (Nothing, _) -> emittedLight
             Nothing ->
-                let unitDirection = normalize (rayDirection ray)
-                    t = 0.5 * (yComp unitDirection + 1.0)
-                    background = (1.0 - t) *^ Vec3 1 1 1 ^+^ t *^ Vec3 0.5 0.7 1.0
-                in acc ^*^ background
+                background ^*^ acc

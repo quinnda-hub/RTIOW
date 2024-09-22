@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE Strict #-}
+{-# LANGUAGE Strict            #-}
 
 {- |
 Module      :  Image
@@ -26,7 +26,7 @@ import           Codec.Picture               (convertRGB8, readImage)
 import qualified Codec.Picture.Types         as JP
 
 import           BVH                         (BVHNode)
-import           Camera                      (Camera (Camera, camImageHeight, camImageWidth, camSamplesPerPixel),
+import           Camera                      (Camera (..),
                                               getRay, rayColour)
 import           Control.Parallel.Strategies (parListChunk, rdeepseq, using)
 import           Data.Text                   (Text)
@@ -46,7 +46,7 @@ import           Vec3                        (RGB, Vec3 (..), (^*), (^+^))
 data Image = Image { imageWidth   :: Int
                    , imageHeight  :: Int
                    , imageColours :: [RGB]
-                   } 
+                   }
 
 renderImage :: Camera -> BVHNode -> Int -> Image
 renderImage camera@(Camera { camImageWidth = width, camImageHeight = height, camSamplesPerPixel = samples }) bvh depth =
@@ -71,7 +71,7 @@ renderImage camera@(Camera { camImageWidth = width, camImageHeight = height, cam
           go _ 0 accColour = accColour ^* (1 / fromIntegral samples')
           go g remainingSamples accColour =
             let (ray, g') = getRay camera baseU baseV g
-                colour   = rayColour g' depth bvh ray
+                colour   = rayColour g' depth bvh ray (camBackgroundCol camera)
             in go g' (remainingSamples - 1) (accColour ^+^ colour)
 
 

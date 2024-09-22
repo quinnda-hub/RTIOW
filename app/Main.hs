@@ -14,7 +14,7 @@ imageWidth :: Int
 imageWidth = 400
 
 camera :: Camera
-camera = createCamera aspectRatio imageWidth 100 80 (Vec3 0 0 9) (Vec3 0 0 0) (Vec3 0 1 0) 0.0 1
+camera = createCamera aspectRatio imageWidth 100 80 (Vec3 0 0 9) (Vec3 0 0 0) (Vec3 0 1 0) 0.0 1 (Vec3 0.7 0.8 1)
 
 main :: IO ()
 main = do 

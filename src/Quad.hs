@@ -33,6 +33,7 @@ data Quad = Quad { qPoint    :: Vec3 -- The origin point of the quad (Q).
                  , qMaterial :: Material -- Material of the quad.
                  }
 
+-- Makes a quad from the Q, U, and V vectors.
 makeQuad :: Vec3 -> Vec3 -> Vec3 -> Material -> Quad
 makeQuad origin u v = Quad origin u v w normal d
   where

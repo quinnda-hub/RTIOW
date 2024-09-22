@@ -21,7 +21,8 @@ module Hittable (Hit(..),
                  Hittable(..),
                  SomeHittable(..),
                  Scatterable(..),
-                 Material(..)) where
+                 Material(..),
+                 emitted) where
 
 import           AABB          (AABB)
 import           Interval      (Interval (..))
@@ -56,9 +57,10 @@ class Scatterable a where
     scatter :: RandomGen g => a -> Ray -> Hit -> g -> (Maybe (Ray, RGB), g)
 
 data Material where
-    Lambertian :: Texture -> Material
-    Metal      :: RGB -> R -> Material
-    Dialectric :: R -> Material
+    Lambertian   :: Texture -> Material
+    Metal        :: RGB -> R -> Material
+    Dialectric   :: R -> Material
+    DiffuseLight :: Texture -> Material
 
 instance Scatterable Material where
     {-# INLINE scatter #-}
@@ -90,6 +92,12 @@ instance Scatterable Material where
                             else refract (normalize direction) (hitNormal h) ratio
             scattered     = Ray (hitPoint h) direction' time
         in (Just (scattered, attenuation), g')
+    scatter (DiffuseLight _) _ _ g = (Nothing, g)
+
+-- Emissive behaviour for DiffuseLight. 
+emitted :: Material -> R -> R -> Vec3 -> RGB
+emitted (DiffuseLight texture) u v p = textureValue texture (u, v) p 
+emitted _ _ _ _ = Vec3 0 0 0    
 
 schlick :: R -> R -> R
 schlick cosine refIdx = r0 + (1-r0) * (1-cosine) ^ (5 :: Integer)
