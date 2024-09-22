@@ -11,7 +11,7 @@ module Scenes (staticBalls,
 import           Data.Foldable (Foldable (foldl'))
 import           Hittable      (Material (..), SomeHittable (SomeHittable))
 import           Perlin        (makePerlin)
-import           Quad          (makeQuad)
+import           Quad          (makeBox, makeQuad)
 import           Random        (arbitraryVec3, arbitraryVec3InRange,
                                 sampleFraction, sampleFractionInRange)
 import           Ray           (Ray (..))
@@ -176,29 +176,33 @@ quads = [left, back, right, upper, lower]
     lower = SomeHittable $ makeQuad (Vec3 (-2.0) (-3.0) 5.0) (Vec3 4.0 0.0 0.0) (Vec3 0.0 0.0 (-4.0)) lwrTeal
 
 simpleLight :: [SomeHittable]
-simpleLight = [ground, sphere, light] 
-  where 
-    perlinTex = makePerlin 42 
+simpleLight = [ground, sphere, light]
+  where
+    perlinTex = makePerlin 42
     lightTex  = DiffuseLight $ SolidColour $ Vec3 4 4 4
     ground    = SomeHittable $ StaticSphere (Vec3 0 (-1000) 0) 1000 (Lambertian $ NoiseTexture perlinTex 4)
     sphere    = SomeHittable $ StaticSphere (Vec3 0 2 0) 2 (Lambertian $ NoiseTexture perlinTex 4)
     light     = SomeHittable $ makeQuad (Vec3 3.0 1.0 (-2)) (Vec3 2 0 0) (Vec3 0 2 0) lightTex
 
-cornellBox :: [SomeHittable] 
-cornellBox = 
-  let 
-    red   = Lambertian $ SolidColour $ Vec3 0.65 0.05 0.05 
-    white = Lambertian $ SolidColour $ Vec3 0.73 0.73 0.73 
-    green = Lambertian $ SolidColour $ Vec3 0.12 0.45 0.15 
+cornellBox :: [SomeHittable]
+cornellBox =
+  let
+    -- Materials.
+    red   = Lambertian $ SolidColour $ Vec3 0.65 0.05 0.05
+    white = Lambertian $ SolidColour $ Vec3 0.73 0.73 0.73
+    green = Lambertian $ SolidColour $ Vec3 0.12 0.45 0.15
     light = DiffuseLight $ SolidColour $ Vec3 15 15 15
 
-    -- Define walls and other objects here within the let block
+    -- Boxes.
+    box1 = makeBox (Vec3 120 0 65) (Vec3 295 165 230) white
+    box2 = makeBox (Vec3 265 0 295) (Vec3 430 330 460) white
+
+    -- Walls.
     wall1  = SomeHittable $ makeQuad (Vec3 555 0 0) (Vec3 0 555 0) (Vec3 0 0 555) green
     wall2  = SomeHittable $ makeQuad (Vec3 0 0 0) (Vec3 0 555 0) (Vec3 0 0 555) red
     wall3  = SomeHittable $ makeQuad (Vec3 0 0 0) (Vec3 555 0 0) (Vec3 0 0 555) white
     wall4  = SomeHittable $ makeQuad (Vec3 555 555 555) (Vec3 (-555) 0 0) (Vec3 0 0 (-555)) white
     wall5  = SomeHittable $ makeQuad (Vec3 0 0 555) (Vec3 555 0 0) (Vec3 0 555 0) white
     light' = SomeHittable $ makeQuad (Vec3 343 554 332) (Vec3 (-130) 0 0) (Vec3 0 0 (-105)) light
-    -- Define other walls and objects similarly
-  in  
-  [wall1, wall2, wall3, wall4, wall5, light'] -- List of hittables
+  in
+  [wall1, wall2, wall3, wall4, wall5, light'] ++ box1 ++ box2

@@ -15,14 +15,15 @@ intersections between a ray and the quad, determining if the intersection point 
 within the bounds of the quad.
 -}
 
-module Quad (Quad(..), makeQuad) where
+module Quad (Quad(..), makeBox, makeQuad) where
 
 import           AABB     (enclosingAABB, makeAABB)
-import           Hittable (Hit (..), Hittable (..), Material)
+import           Hittable (Hit (..), Hittable (..), Material, SomeHittable (..))
 import           Interval (Interval (..), contains)
 import           Math     (R)
 import           Ray      (Ray (..), rayAt, setFaceNormal)
-import           Vec3     (Vec3 (..), normalize, (<.>), (><), (^+^), (^-^), (^/))
+import           Vec3     (Vec3 (..), negateV, normalize, (<.>), (><), (^+^),
+                           (^-^), (^/))
 
 data Quad = Quad { qPoint    :: Vec3 -- The origin point of the quad (Q).
                  , qU        :: Vec3 -- Spanning vector U of the quad.
@@ -33,11 +34,33 @@ data Quad = Quad { qPoint    :: Vec3 -- The origin point of the quad (Q).
                  , qMaterial :: Material -- Material of the quad.
                  }
 
+-- Makes a 3D box from two opposite vertices a and b.
+makeBox :: Vec3 -> Vec3 -> Material -> [SomeHittable]
+makeBox a b mat =
+  let
+    minCorner = Vec3 (min (xComp a) (xComp b)) (min (yComp a) (yComp b)) (min (zComp a) (zComp b))
+    maxCorner = Vec3 (max (xComp a) (xComp b)) (max (yComp a) (yComp b)) (max (zComp a) (zComp b))
+
+    -- Edges.
+    dx = Vec3 (xComp maxCorner - xComp minCorner) 0 0
+    dy = Vec3 0 (yComp maxCorner - yComp minCorner) 0
+    dz = Vec3 0 0 (zComp maxCorner - zComp minCorner)
+
+    -- Faces.
+    front  = SomeHittable $ makeQuad (Vec3 (xComp minCorner) (yComp minCorner) (zComp minCorner)) dx dy mat
+    right  = SomeHittable $ makeQuad (Vec3 (xComp maxCorner) (yComp minCorner) (zComp maxCorner)) (negateV dz) dy mat
+    back   = SomeHittable $ makeQuad (Vec3 (xComp maxCorner) (yComp minCorner) (zComp minCorner)) dz dy mat
+    left   = SomeHittable $ makeQuad (Vec3 (xComp minCorner) (yComp minCorner) (zComp minCorner)) dz dy mat
+    top    = SomeHittable $ makeQuad (Vec3 (xComp minCorner) (yComp maxCorner) (zComp maxCorner)) dx (negateV dy) mat
+    bottom = SomeHittable $ makeQuad (Vec3 (xComp minCorner) (yComp minCorner) (zComp minCorner)) dx dz mat
+  in
+    [front, right, back, left, top, bottom]
+
 -- Makes a quad from the Q, U, and V vectors.
 makeQuad :: Vec3 -> Vec3 -> Vec3 -> Material -> Quad
 makeQuad origin u v = Quad origin u v w normal d
   where
-    n      = u >< v 
+    n      = u >< v
     normal = normalize n
     w      = n ^/ (n <.> n)
     d      = normal <.> origin
@@ -57,7 +80,7 @@ instance Hittable Quad where
       where denom  = qNormal <.> rayDirection ray
             t      = (qD - qNormal <.> rayOrigin ray) / denom
             hitVec = intersection ^-^ qPoint
-            alpha  = qW <.> (hitVec >< qV) 
+            alpha  = qW <.> (hitVec >< qV)
             beta   = qW <.> (qU >< hitVec)
             (normal, front) = setFaceNormal ray qNormal
             intersection    = rayAt ray t
