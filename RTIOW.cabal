@@ -70,11 +70,10 @@ library
                       Quad,
                       Random,
                       Ray,
-                      RotateY,
                       Scenes,
                       Sphere,
                       Texture,
-                      Translate,
+                      Transform,
                       Vec3,
                       Utils
 
