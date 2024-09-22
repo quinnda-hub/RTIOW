@@ -113,22 +113,21 @@ getRay camera baseU baseV gen =
 {-# INLINEABLE rayColour #-}
 rayColour :: RandomGen g
           => g
-          -> Int -- Max recursion depth.
-          -> BVHNode
-          -> Ray
-          -> RGB -- Background colour.
-          -> RGB
-rayColour g maxDepth bvh r background = loop g maxDepth r (Vec3 1 1 1)
+          -> Int     -- Max recursion depth
+          -> BVHNode -- The scene (bounding volume hierarchy)
+          -> Ray     -- The ray being traced
+          -> RGB     -- Background color
+          -> RGB     -- The computed color for this ray
+rayColour g maxDepth bvh r background = loop g maxDepth r
   where
-    loop _ 0 _ acc = acc
-    loop gen depth ray acc =
-        case hit bvh ray (interval 0.001 infinity) of
-            Just hitRecord@(Hit p _ _ _ m (u, v)) ->
-                let emittedLight = emitted m u v p
-                in case scatter m ray hitRecord gen of
-                    (Just (scatteredRay, attenuation), gen') ->
-                        let newAcc = (acc ^*^ attenuation) ^+^ emittedLight
-                        in loop gen' (depth - 1) scatteredRay newAcc
-                    (Nothing, _) -> emittedLight
-            Nothing ->
-                background ^*^ acc
+    loop _ 0 _ = Vec3 0 0 0 -- No light gathered after max depth
+    loop gen depth ray
+      | Just hitRecord@(Hit p _ _ _ m (u, v)) <- hit bvh ray (interval 0.001 infinity) =
+          let emittedLight = emitted m u v p
+          in case scatter m ray hitRecord gen of
+                (Just (scatteredRay, attenuation), gen') ->
+                    emittedLight ^+^ (attenuation ^*^ loop gen' (depth - 1) scatteredRay)
+                (Nothing, _) -> emittedLight
+      | otherwise = background
+
+

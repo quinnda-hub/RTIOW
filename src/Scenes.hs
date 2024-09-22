@@ -4,7 +4,8 @@ module Scenes (staticBalls,
                checkeredSpheres,
                earth,
                perlinSpheres,
-               quads) where
+               quads,
+               simpleLight) where
 
 import           Data.Foldable (Foldable (foldl'))
 import           Hittable      (Material (..), SomeHittable (SomeHittable))
@@ -172,3 +173,12 @@ quads = [left, back, right, upper, lower]
     right = SomeHittable $ makeQuad (Vec3 3.0 (-2.0) 1.0) (Vec3 0.0 0.0 4.0) (Vec3 0.0 4.0 0.0) rightBlue
     upper = SomeHittable $ makeQuad (Vec3 (-2.0) 3.0 1.0) (Vec3 4.0 0.0 0.0) (Vec3 0.0 0.0 4.0) uprOrange
     lower = SomeHittable $ makeQuad (Vec3 (-2.0) (-3.0) 5.0) (Vec3 4.0 0.0 0.0) (Vec3 0.0 0.0 (-4.0)) lwrTeal
+
+simpleLight :: [SomeHittable]
+simpleLight = [ground, sphere, light] 
+  where 
+    perlinTex = makePerlin 42 
+    lightTex = DiffuseLight $ SolidColour $ Vec3 4 4 4
+    ground    = SomeHittable $ StaticSphere (Vec3 0 (-1000) 0) 1000 (Lambertian $ NoiseTexture perlinTex 4)
+    sphere    = SomeHittable $ StaticSphere (Vec3 0 2 0) 2 (Lambertian $ NoiseTexture perlinTex 4)
+    light     = SomeHittable $ makeQuad (Vec3 3.0 1.0 (-2)) (Vec3 2 0 0) (Vec3 0 2 0) lightTex
