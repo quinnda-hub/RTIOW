@@ -1,18 +1,18 @@
 {-# LANGUAGE Strict #-}
 
-{- | 
+{- |
 Module      :  Interval
 Copyright   :  (c) Quinn Anhorn 2024
 License     :  BSD3 (see LICENSE)
 Maintainer  :  qda869@usask.ca
 Stability   :  experimental
 
-This module defines the `Interval` data type and provides utility functions 
-for working with intervals. The `Interval` type represents a closed interval 
-with minimum and maximum bounds, or an empty interval. Functions like 
-`contains`, `surrounds`, and `clamp` allow for checking whether a value lies 
-within an interval and constraining a value to the interval. The module also 
-provides commonly used intervals such as `universe` (spanning all real numbers) 
+This module defines the `Interval` data type and provides utility functions
+for working with intervals. The `Interval` type represents a closed interval
+with minimum and maximum bounds, or an empty interval. Functions like
+`contains`, `surrounds`, and `clamp` allow for checking whether a value lies
+within an interval and constraining a value to the interval. The module also
+provides commonly used intervals such as `universe` (spanning all real numbers)
 and `defaultInterval`.
 -}
 
@@ -21,11 +21,12 @@ module Interval (Interval(..),
                  interval,
                  universe,
                  size,
-                 contains, 
+                 contains,
                  surrounds,
                  clamp,
                  expand,
-                 enclosingInterval) where
+                 enclosingInterval,
+                 translateInterval) where
 
 import           Math (R, infinity)
 
@@ -59,7 +60,7 @@ surrounds :: Interval -> R -> Bool
 surrounds (Interval a b) x = a < x && x < b
 surrounds Empty _          = False
 
--- Constrains a value to lie within the interval. 
+-- Constrains a value to lie within the interval.
 clamp :: Interval -> R -> R
 clamp (Interval a b) x
     | x < a     = a
@@ -68,15 +69,21 @@ clamp (Interval a b) x
 clamp Empty x = x
 
 -- Expands the interval by a given value.
-expand :: Interval -> R -> Interval 
-expand (Interval a b) x = 
-    let padding = x / 2 
+expand :: Interval -> R -> Interval
+expand (Interval a b) x =
+    let padding = x / 2
     in Interval (a-padding) (b+padding)
 expand Empty _ = Empty
 
 -- Constructs an interval given two existing Intervals.
-enclosingInterval :: Interval -> Interval -> Interval 
-enclosingInterval (Interval amin amax) (Interval bmin bmax) = 
-    Interval (min amin bmin) (max amax bmax) 
-enclosingInterval Empty i = i 
-enclosingInterval i Empty = i 
+enclosingInterval :: Interval -> Interval -> Interval
+enclosingInterval (Interval amin amax) (Interval bmin bmax) =
+    Interval (min amin bmin) (max amax bmax)
+enclosingInterval Empty i = i
+enclosingInterval i Empty = i
+
+-- Translates an interval by some displacement.
+translateInterval :: Interval -> R -> Interval
+translateInterval (Interval a b) displacement =
+    Interval (a + displacement) (b + displacement)
+translateInterval Empty _ = Empty

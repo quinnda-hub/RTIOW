@@ -23,9 +23,9 @@ module Ray (Ray(..),
 import           Math (R)
 import           Vec3 (Vec3 (..), negateV, (*^), (<.>), (^+^))
 
-data Ray = Ray { rayOrigin    :: !Vec3
-               , rayDirection :: !Vec3
-               , rayTime      :: !R
+data Ray = Ray { rayOrigin    :: Vec3
+               , rayDirection :: Vec3
+               , rayTime      :: R
                } deriving (Show, Eq)
 
 -- Computes the position along a ray at a given parameter t.

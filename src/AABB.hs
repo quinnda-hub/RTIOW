@@ -22,9 +22,11 @@ module AABB (AABB(..),
              boundingBoxMax,
              boundingBoxMin,
              longestAxis,
-             enclosingAABB) where
+             enclosingAABB,
+             translateAABB) where
 
-import           Interval (Interval (..), enclosingInterval, expand, size)
+import           Interval (Interval (..), enclosingInterval, expand, size,
+                           translateInterval)
 import           Math     (R)
 import           Ray      (Ray (..))
 import           Vec3     (Vec3 (..), zeroV)
@@ -103,3 +105,10 @@ longestAxis (AABB x y z) =
     then if xSize > zSize then xComp else zComp
     else if ySize > zSize then yComp else zComp
 longestAxis AABBEmpty = xComp -- Just use the x axis as a default for an empty AABB.
+
+translateAABB :: AABB -> Vec3 -> AABB
+translateAABB (AABB xIn yIn zIn) (Vec3 ox oy oz) =
+  AABB (translateInterval xIn ox)
+       (translateInterval yIn oy) 
+       (translateInterval zIn oz) 
+translateAABB AABBEmpty _ = AABBEmpty       
