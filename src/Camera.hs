@@ -130,4 +130,3 @@ rayColour g maxDepth bvh r background = loop g maxDepth r
                 (Nothing, _) -> emittedLight
       | otherwise = background
 
-
