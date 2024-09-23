@@ -11,7 +11,7 @@ module Scenes (staticBalls,
 import           Data.Foldable (Foldable (foldl'))
 import           Hittable      (Material (..), SomeHittable (SomeHittable))
 import           Perlin        (makePerlin)
-import           Quad          (makeBox, makeQuad)
+import           Quad          (makeBox, makeQuad, rotateQuad)
 import           Random        (arbitraryVec3, arbitraryVec3InRange,
                                 sampleFraction, sampleFractionInRange)
 import           Ray           (Ray (..))
@@ -194,8 +194,8 @@ cornellBox =
     light = DiffuseLight $ SolidColour $ Vec3 15 15 15
 
     -- Boxes.
-    box1 = makeBox (Vec3 120 0 65) (Vec3 295 165 230) white
-    box2 = makeBox (Vec3 265 0 295) (Vec3 430 330 460) white
+    box1 = map (SomeHittable . (`rotateQuad` 15)) $ makeBox (Vec3 135 0 50) (Vec3 300 165 215) white
+    box2 = map (SomeHittable . (`rotateQuad` (-18))) $ makeBox (Vec3 145 0 365) (Vec3 310 330 530) white
 
     -- Walls.
     wall1  = SomeHittable $ makeQuad (Vec3 555 0 0) (Vec3 0 555 0) (Vec3 0 0 555) green

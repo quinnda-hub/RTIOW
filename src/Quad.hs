@@ -15,12 +15,15 @@ intersections between a ray and the quad, determining if the intersection point 
 within the bounds of the quad.
 -}
 
-module Quad (Quad(..), makeBox, makeQuad) where
+module Quad (Quad(..),
+             makeBox,
+             makeQuad,
+             rotateQuad) where
 
 import           AABB     (enclosingAABB, makeAABB)
-import           Hittable (Hit (..), Hittable (..), Material, SomeHittable (..))
+import           Hittable (Hit (..), Hittable (..), Material)
 import           Interval (Interval (..), contains)
-import           Math     (R)
+import           Math     (R, degrees2Radians)
 import           Ray      (Ray (..), rayAt, setFaceNormal)
 import           Vec3     (Vec3 (..), negateV, normalize, (<.>), (><), (^+^),
                            (^-^), (^/))
@@ -35,7 +38,7 @@ data Quad = Quad { qPoint    :: Vec3 -- The origin point of the quad (Q).
                  }
 
 -- Makes a 3D box from two opposite vertices a and b.
-makeBox :: Vec3 -> Vec3 -> Material -> [SomeHittable]
+makeBox :: Vec3 -> Vec3 -> Material -> [Quad]
 makeBox a b mat =
   let
     minCorner = Vec3 (min (xComp a) (xComp b)) (min (yComp a) (yComp b)) (min (zComp a) (zComp b))
@@ -47,12 +50,12 @@ makeBox a b mat =
     dz = Vec3 0 0 (zComp maxCorner - zComp minCorner)
 
     -- Faces.
-    front  = SomeHittable $ makeQuad (Vec3 (xComp minCorner) (yComp minCorner) (zComp minCorner)) dx dy mat
-    right  = SomeHittable $ makeQuad (Vec3 (xComp maxCorner) (yComp minCorner) (zComp maxCorner)) (negateV dz) dy mat
-    back   = SomeHittable $ makeQuad (Vec3 (xComp maxCorner) (yComp minCorner) (zComp minCorner)) dz dy mat
-    left   = SomeHittable $ makeQuad (Vec3 (xComp minCorner) (yComp minCorner) (zComp minCorner)) dz dy mat
-    top    = SomeHittable $ makeQuad (Vec3 (xComp minCorner) (yComp maxCorner) (zComp maxCorner)) dx (negateV dy) mat
-    bottom = SomeHittable $ makeQuad (Vec3 (xComp minCorner) (yComp minCorner) (zComp minCorner)) dx dz mat
+    front  = makeQuad (Vec3 (xComp minCorner) (yComp minCorner) (zComp minCorner)) dx dy mat
+    right  = makeQuad (Vec3 (xComp maxCorner) (yComp minCorner) (zComp maxCorner)) (negateV dz) dy mat
+    back   = makeQuad (Vec3 (xComp maxCorner) (yComp minCorner) (zComp minCorner)) dz dy mat
+    left   = makeQuad (Vec3 (xComp minCorner) (yComp minCorner) (zComp minCorner)) dz dy mat
+    top    = makeQuad (Vec3 (xComp minCorner) (yComp maxCorner) (zComp maxCorner)) dx (negateV dy) mat
+    bottom = makeQuad (Vec3 (xComp minCorner) (yComp minCorner) (zComp minCorner)) dx dz mat
   in
     [front, right, back, left, top, bottom]
 
@@ -64,6 +67,25 @@ makeQuad origin u v = Quad origin u v w normal d
     normal = normalize n
     w      = n ^/ (n <.> n)
     d      = normal <.> origin
+
+-- Rotates a quad around the y axis by a given angle in degrees.
+rotateQuad :: Quad -> R -> Quad
+rotateQuad Quad{..} angle =
+  let radians = degrees2Radians angle
+      sinT    = sin radians
+      cosT    = cos radians
+  in Quad { qPoint  = rotateVecY qPoint sinT cosT
+          , qU      = rotateVecY qU sinT cosT
+          , qV      = rotateVecY qV sinT cosT
+          , qW      = rotateVecY qW sinT cosT
+          , qNormal = rotateVecY qNormal sinT cosT
+          , qD      = qD
+          , qMaterial = qMaterial}
+
+-- Rotate a vector around the Y-axis by given sin and cos of the angle
+rotateVecY :: Vec3 -> R -> R -> Vec3
+rotateVecY (Vec3 x y z) sinT cosT =
+    Vec3 (cosT*x + (-sinT)*z) y (sinT*x + cosT*z)
 
 instance Hittable Quad where
     {-# INLINABLE hit #-}

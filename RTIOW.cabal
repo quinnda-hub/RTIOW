@@ -73,7 +73,6 @@ library
                       Scenes,
                       Sphere,
                       Texture,
-                      Transform,
                       Vec3,
                       Utils
 
