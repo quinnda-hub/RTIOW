@@ -6,12 +6,13 @@ module Scenes (staticBalls,
                perlinSpheres,
                quads,
                simpleLight,
-               cornellBox) where
+               cornellBox, 
+               finalScene) where
 
 import           Data.Foldable (Foldable (foldl'))
 import           Hittable      (Material (..), SomeHittable (SomeHittable))
 import           Perlin        (makePerlin)
-import           Quad          (makeBox, makeQuad, rotateQuad)
+import           Quad          (makeBox, makeQuad, rotateQuad, Quad)
 import           Random        (arbitraryVec3, arbitraryVec3InRange,
                                 sampleFraction, sampleFractionInRange)
 import           Ray           (Ray (..))
@@ -206,3 +207,35 @@ cornellBox =
     light' = SomeHittable $ makeQuad (Vec3 343 554 332) (Vec3 (-130) 0 0) (Vec3 0 0 (-105)) light
   in
   [wall1, wall2, wall3, wall4, wall5, light'] ++ box1 ++ box2
+
+finalScene :: Int -> [SomeHittable]
+finalScene seed = floorSquares ++ [light]
+  where 
+    lightTex     = DiffuseLight $ SolidColour $ Vec3 7 7 7
+    light        = SomeHittable $ makeQuad (Vec3 123 554 147) (Vec3 300 0 0) (Vec3 0 0 265) lightTex
+    floorSquares = map SomeHittable . fst $ mkObjects 20 (Lambertian $ SolidColour $ Vec3 0.48 0.83 0.53) $ mkStdGen seed
+
+    mkObjects :: Int -> Material -> StdGen -> ([Quad], StdGen)
+    mkObjects boxesPerSide material gen = 
+      let (qs, finalGen) = foldl' generateBox ([], gen) [0..boxesPerSide-1]
+      in (concat qs, finalGen)
+      where 
+        w    = 100.0 
+        x0 i = -1000.0 + fromIntegral i*w 
+        z0 j = -1000.0 + fromIntegral j*w
+        y0   = 0.0 
+
+        generateBox (accBoxes, currentGen) i = 
+          foldl' (\(acc, gen') j -> 
+            let xStart = x0 i 
+                zStart = z0 j 
+                xEnd   = xStart + w 
+                zEnd   = zStart + w
+                
+                (yEnd, newGen) = sampleFractionInRange gen' 1 101 
+                bottomLeft     = Vec3 xStart y0 zStart 
+                topRight       = Vec3 xEnd yEnd zEnd 
+                newBox         = makeBox bottomLeft topRight material 
+            in (newBox : acc, newGen)
+                ) (accBoxes, currentGen) [0..boxesPerSide-1]
+    
