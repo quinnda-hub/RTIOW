@@ -25,8 +25,7 @@ module Interval (Interval(..),
                  surrounds,
                  clamp,
                  expand,
-                 enclosingInterval,
-                 translateInterval) where
+                 enclosingInterval) where
 
 import           Math (R, infinity)
 
@@ -81,9 +80,3 @@ enclosingInterval (Interval amin amax) (Interval bmin bmax) =
     Interval (min amin bmin) (max amax bmax)
 enclosingInterval Empty i = i
 enclosingInterval i Empty = i
-
--- Translates an interval by some displacement.
-translateInterval :: Interval -> R -> Interval
-translateInterval (Interval a b) displacement =
-    Interval (a + displacement) (b + displacement)
-translateInterval Empty _ = Empty
