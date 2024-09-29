@@ -51,10 +51,10 @@ makeBox a b mat =
 
     -- Faces.
     front  = makeQuad (Vec3 (xComp minCorner) (yComp minCorner) (zComp minCorner)) dx dy mat
-    right  = makeQuad (Vec3 (xComp maxCorner) (yComp minCorner) (zComp maxCorner)) (negateV dz) dy mat
-    back   = makeQuad (Vec3 (xComp maxCorner) (yComp minCorner) (zComp minCorner)) dz dy mat
-    left   = makeQuad (Vec3 (xComp minCorner) (yComp minCorner) (zComp minCorner)) dz dy mat
-    top    = makeQuad (Vec3 (xComp minCorner) (yComp maxCorner) (zComp maxCorner)) dx (negateV dy) mat
+    right  = makeQuad (Vec3 (xComp maxCorner) (yComp minCorner) (zComp minCorner)) dz dy mat
+    back = makeQuad (Vec3 (xComp minCorner) (yComp minCorner) (zComp maxCorner)) dx dy mat
+    left   = makeQuad (Vec3 (xComp minCorner) (yComp minCorner) (zComp maxCorner)) (negateV dz) dy mat
+    top    = makeQuad (Vec3 (xComp minCorner) (yComp maxCorner) (zComp minCorner)) dx dz mat
     bottom = makeQuad (Vec3 (xComp minCorner) (yComp minCorner) (zComp minCorner)) dx dz mat
   in
     [front, right, back, left, top, bottom]
