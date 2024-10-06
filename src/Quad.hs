@@ -82,7 +82,7 @@ rotateQuad Quad{..} angle =
           , qD      = qD
           , qMaterial = qMaterial}
 
--- Rotate a vector around the Y-axis by given sin and cos of the angle
+-- Rotate a vector around the Y-axis by given sin and cos of the angle.
 rotateVecY :: Vec3 -> R -> R -> Vec3
 rotateVecY (Vec3 x y z) sinT cosT =
     Vec3 (cosT*x + (-sinT)*z) y (sinT*x + cosT*z)

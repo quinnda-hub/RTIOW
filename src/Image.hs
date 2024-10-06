@@ -74,7 +74,6 @@ renderImage camera@(Camera { camImageWidth = width, camImageHeight = height, cam
                 colour   = rayColour g' depth bvh ray (camBackgroundCol camera)
             in go g' (remainingSamples - 1) (accColour ^+^ colour)
 
-
 writeImage :: Camera -> BVHNode -> Int -> IO ()
 writeImage camera bvh raysPerSample = do
     createDirectoryIfMissing True "images"

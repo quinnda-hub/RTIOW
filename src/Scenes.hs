@@ -6,13 +6,13 @@ module Scenes (staticBalls,
                perlinSpheres,
                quads,
                simpleLight,
-               cornellBox, 
+               cornellBox,
                finalScene) where
 
 import           Data.Foldable (Foldable (foldl'))
 import           Hittable      (Material (..), SomeHittable (SomeHittable))
 import           Perlin        (makePerlin)
-import           Quad          (makeBox, makeQuad, rotateQuad, Quad)
+import           Quad          (Quad, makeBox, makeQuad, rotateQuad)
 import           Random        (arbitraryVec3, arbitraryVec3InRange,
                                 sampleFraction, sampleFractionInRange)
 import           Ray           (Ray (..))
@@ -208,34 +208,84 @@ cornellBox =
   in
   [wall1, wall2, wall3, wall4, wall5, light'] ++ box1 ++ box2
 
-finalScene :: Int -> [SomeHittable]
-finalScene seed = floorSquares ++ [light]
-  where 
-    lightTex     = DiffuseLight $ SolidColour $ Vec3 7 7 7
-    light        = SomeHittable $ makeQuad (Vec3 123 554 147) (Vec3 300 0 0) (Vec3 0 0 265) lightTex
-    floorSquares = map SomeHittable . fst $ mkObjects 20 (Lambertian $ SolidColour $ Vec3 0.48 0.83 0.53) $ mkStdGen seed
+finalScene :: Int -> Texture -> [SomeHittable]
+finalScene seed texture = ground ++ [ light
+                                    , movingSphere
+                                    , glassSphere
+                                    , metalSphere
+                                    , subDialectric
+                                    , subSolid
+                                    , earthSphere
+                                    , perlinSphere
+                                    ] ++ randomSpheres
+  where
+    -- Light.
+    lightTex = DiffuseLight $ SolidColour $ Vec3 7 7 7
+    light    = SomeHittable $ makeQuad (Vec3 123 554 147) (Vec3 300 0 0) (Vec3 0 0 265) lightTex
 
-    mkObjects :: Int -> Material -> StdGen -> ([Quad], StdGen)
-    mkObjects boxesPerSide material gen = 
+    -- Ground.
+    ground = map SomeHittable . fst $ mkGround 20 (Lambertian $ SolidColour $ Vec3 0.48 0.83 0.53) $ mkStdGen seed
+
+    -- Moving sphere.
+    center1      = Vec3 400 400 200
+    delta        = Vec3 30 0 0
+    sphereMat    = Lambertian $ SolidColour $ Vec3 0.7 0.3 0.1
+    movingSphere = SomeHittable $ MovingSphere (Ray center1 delta 0) 50 sphereMat
+
+    -- Glass sphere.
+    glassSphere = SomeHittable $ StaticSphere (Vec3 260 150 45) 50 (Dialectric 1.5)
+
+    -- Metal sphere.
+    metalSphere = SomeHittable $ StaticSphere (Vec3 0 150 145) 50 (Metal (Vec3 0.8 0.8 0.9) 1.0)
+
+    -- Subsurface sphere.
+    subDialectric = SomeHittable $ StaticSphere (Vec3 360 150 145) 70 (Dialectric 1.5)
+    subSolid      = SomeHittable $ StaticSphere (Vec3 360 150 145) 60 (Lambertian $ SolidColour $ Vec3 0.2 0.4 0.9)
+
+    -- Earth sphere.
+    earthSphere = SomeHittable $ StaticSphere (Vec3 400 200 400) 100 (Lambertian texture)
+
+    -- Perlin sphere.
+    perTex       = makePerlin seed
+    perlinSphere = SomeHittable $ StaticSphere (Vec3 220 280 300) 80 (Lambertian $ NoiseTexture perTex 0.2)
+
+    -- Random spheres.
+    randomSpheres = map SomeHittable . fst $ mkSpheres 1000 (mkStdGen seed)
+
+    mkSpheres :: Int -> StdGen -> ([Sphere], StdGen)
+    mkSpheres n g = go n g []
+      where
+        go 0 gen spheres = (spheres, gen)
+        go i gen spheres =
+          let (x, gen1) = sampleFractionInRange gen (-10) 130
+              (y, gen2) = sampleFractionInRange gen1 270 435
+              (z, gen3) = sampleFractionInRange gen2 295 460
+              center = Vec3 x y z
+              radius = 10
+              sphere = StaticSphere center radius (Lambertian $ SolidColour $ Vec3 0.73 0.73 0.73)
+          in go (i - 1) gen3 (sphere : spheres)
+
+    mkGround :: Int -> Material -> StdGen -> ([Quad], StdGen)
+    mkGround boxesPerSide material gen =
       let (qs, finalGen) = foldl' generateBox ([], gen) [0..boxesPerSide-1]
       in (concat qs, finalGen)
-      where 
-        w    = 100.0 
-        x0 i = -1000.0 + fromIntegral i*w 
+      where
+        w    = 100.0
+        x0 i = -1000.0 + fromIntegral i*w
         z0 j = -1000.0 + fromIntegral j*w
-        y0   = 0.0 
+        y0   = 0.0
 
-        generateBox (accBoxes, currentGen) i = 
-          foldl' (\(acc, gen') j -> 
-            let xStart = x0 i 
-                zStart = z0 j 
-                xEnd   = xStart + w 
+        generateBox (accBoxes, currentGen) i =
+          foldl' (\(acc, gen') j ->
+            let xStart = x0 i
+                zStart = z0 j
+                xEnd   = xStart + w
                 zEnd   = zStart + w
-                
-                (yEnd, newGen) = sampleFractionInRange gen' 1 101 
-                bottomLeft     = Vec3 xStart y0 zStart 
-                topRight       = Vec3 xEnd yEnd zEnd 
-                newBox         = makeBox bottomLeft topRight material 
+
+                (yEnd, newGen) = sampleFractionInRange gen' 1 101
+                bottomLeft     = Vec3 xStart y0 zStart
+                topRight       = Vec3 xEnd yEnd zEnd
+                newBox         = makeBox bottomLeft topRight material
             in (newBox : acc, newGen)
                 ) (accBoxes, currentGen) [0..boxesPerSide-1]
-    
+
