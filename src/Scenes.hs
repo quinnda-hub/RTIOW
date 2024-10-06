@@ -257,7 +257,7 @@ finalScene seed texture = ground ++ [ light
       where
         go 0 gen spheres = (spheres, gen)
         go i gen spheres =
-          let (x, gen1) = sampleFractionInRange gen (-10) 130
+          let (x, gen1) = sampleFractionInRange gen (-50) 115
               (y, gen2) = sampleFractionInRange gen1 270 435
               (z, gen3) = sampleFractionInRange gen2 295 460
               center = Vec3 x y z
