@@ -162,9 +162,10 @@ reflect v n =
     v ^-^ 2*(v<.>n)*^n
 
 -- Refract a vector through a surface with a given normal `n`and a refraction index `ratio`.
-refract ::  Vec3 -> Vec3 -> R -> Vec3
-refract unitRay normal ratio = rOutPerp ^+^ rOutPerp
-    where
-        cosTheta     = negateV unitRay <.> normal
-        rOutParallel = (unitRay ^+^ normal ^* cosTheta) ^* ratio
-        rOutPerp     = negateV $ normal ^* sqrt (1.0 - lengthSquared rOutParallel)
+refract :: Vec3 -> Vec3 -> R -> Vec3
+refract unitRay normal ratio = rOutPerp ^+^ rOutParallel
+  where
+    cosTheta     = negateV unitRay <.> normal
+    rOutParallel = (unitRay ^+^ normal ^* cosTheta) ^* ratio
+    rOutPerp     = negateV $ normal ^* sqrt (1.0 - lengthSquared rOutParallel)
+
